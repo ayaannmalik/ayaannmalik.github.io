@@ -149,7 +149,7 @@ def main():
         print(f"source clip not found at {SRC}", file=sys.stderr)
         sys.exit(1)
 
-    font_size = 20
+    font_size = 10
     font = load_font(font_size)
     bbox = font.getbbox("M")
     cell_w = max(7, bbox[2] - bbox[0])
@@ -174,7 +174,7 @@ def main():
         "-f", "rawvideo", "-pix_fmt", "rgb24",
         "-s", f"{out_w}x{out_h}", "-r", str(FPS), "-i", "-",
         "-c:v", "libx264", "-pix_fmt", "yuv420p",
-        "-crf", "20", "-preset", "slow",
+        "-crf", "26", "-preset", "slow",
         "-profile:v", "high", "-level", "4.2",
         "-movflags", "+faststart", DST,
     ]
