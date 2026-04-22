@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ayaan Naveed Malik</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&family=Unica+One&display=swap" rel="stylesheet">
     <style>
         * {
           margin: 0;
@@ -11,29 +14,158 @@
           box-sizing: border-box;
         }
 
+        html, body {
+          background: #fff;
+        }
+
         body {
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           line-height: 1.6;
           color: #333;
-          background: #fff;
           font-size: 16px;
-          max-width: 800px;
-          margin: 0 auto;
-          padding: 60px 40px;
           text-align: justify;
+        }
+
+        .landing {
+          position: relative;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+          background: #000;
+          padding: 40px 20px;
+          text-align: center;
+        }
+
+        .landing-video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          z-index: 0;
+          filter: saturate(1.12) brightness(1.02);
+        }
+
+        .landing-overlay {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+          pointer-events: none;
+          background:
+            radial-gradient(ellipse 120% 90% at center, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.35) 100%);
+        }
+
+        .landing-inner {
+          position: relative;
+          z-index: 2;
+          color: #fff;
+          width: 100%;
+          max-width: 1100px;
+          padding: 40px 24px;
+        }
+
+        .landing-title {
+          font-family: "Unica One", "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+          font-size: clamp(30px, 7.2vw, 82px);
+          font-weight: 400;
+          letter-spacing: 0.06em;
+          color: #fff;
+          margin-bottom: 20px;
+          line-height: 1.02;
+          white-space: nowrap;
+          text-shadow:
+            0 1px 0 rgba(0, 0, 0, 0.7),
+            0 2px 10px rgba(0, 0, 0, 0.55),
+            0 4px 28px rgba(0, 0, 0, 0.62),
+            0 8px 52px rgba(0, 0, 0, 0.48);
+        }
+
+        .landing-title .slash {
+          opacity: 0.45;
+          margin: 0 0.14em;
+          font-weight: 400;
+        }
+
+        .landing-links {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: center;
+          gap: 0.35em 0.85em;
+          font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          font-size: clamp(13px, 1.55vw, 15px);
+          font-weight: 500;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.88);
+          text-shadow:
+            0 1px 0 rgba(0, 0, 0, 0.6),
+            0 2px 8px rgba(0, 0, 0, 0.52),
+            0 4px 22px rgba(0, 0, 0, 0.62),
+            0 6px 36px rgba(0, 0, 0, 0.52);
+        }
+
+        .landing-links a {
+          color: inherit;
+          text-decoration: none;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+          padding-bottom: 2px;
+          transition: color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+        }
+
+        .landing-links a:hover {
+          color: #fff;
+          border-bottom-color: rgba(236, 72, 114, 0.85);
+        }
+
+        .landing-links .sep {
+          opacity: 0.35;
+          font-weight: 400;
+          user-select: none;
+          letter-spacing: 0;
+        }
+
+        .landing-scroll {
+          position: absolute;
+          bottom: 28px;
+          left: 50%;
+          transform: translateX(-50%);
+          color: #fff;
+          text-decoration: none;
+          font-size: 20px;
+          z-index: 2;
+          opacity: 0.5;
+          animation: scrollBounce 2.2s ease-in-out infinite;
+          text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+        }
+
+        .landing-scroll:hover {
+          opacity: 0.9;
+        }
+
+        @keyframes scrollBounce {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50%      { transform: translateX(-50%) translateY(8px); }
+        }
+
+        .content {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 80px clamp(24px, 6vw, 72px) 60px;
+          font-family: "Lucida Grande", "Lucida Sans Unicode", "Helvetica Neue", Helvetica, "Lucida Sans", Verdana, Geneva, sans-serif;
+          font-size: 16px;
+          line-height: 1.65;
+          text-align: justify;
+          -webkit-font-smoothing: antialiased;
         }
 
         h1 {
           font-size: 32px;
           font-weight: 600;
-          margin-bottom: 8px;
+          margin-bottom: 4px;
           color: #000;
-        }
-
-        .tagline {
-          color: #666;
-          margin-bottom: 40px;
-          font-size: 16px;
         }
 
         .section {
@@ -52,20 +184,57 @@
           margin-bottom: 12px;
         }
 
-        .links {
+        .about-tldr {
+          margin-bottom: 24px;
+          padding-bottom: 22px;
+          border-bottom: 1px solid #e6e6e6;
           display: flex;
-          gap: 16px;
-          margin-bottom: 40px;
+          align-items: flex-start;
+          gap: 24px;
         }
 
-        .links a {
-          color: #000;
-          text-decoration: none;
-          font-weight: 500;
+        .about-tldr .tldr-photo {
+          flex-shrink: 0;
+          width: 140px;
+          height: auto;
+          border-radius: 10px;
+          display: block;
+          object-fit: cover;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
         }
 
-        .links a:hover {
+        .about-tldr .tldr-text {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .about-tldr p:last-child {
+          margin-bottom: 0;
+        }
+
+        @media (max-width: 560px) {
+          .about-tldr {
+            flex-direction: column;
+            gap: 16px;
+          }
+
+          .about-tldr .tldr-photo {
+            width: 120px;
+          }
+        }
+
+        .highlight-link {
+          color: inherit;
           text-decoration: underline;
+          text-decoration-color: #ec4872;
+          text-decoration-thickness: 4px;
+          text-underline-offset: 3px;
+          text-decoration-skip-ink: none;
+          transition: text-decoration-color 0.2s ease;
+        }
+
+        .highlight-link:hover {
+          text-decoration-color: #ff6389;
         }
 
         .project {
@@ -110,24 +279,49 @@
           margin-bottom: 6px;
         }
 
-        .project-links {
+        .project .meta {
           font-size: 14px;
-          color: #666;
-          margin-bottom: 8px;
+          color: #777;
+          margin-bottom: 10px;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          gap: 6px 10px;
+          font-style: italic;
         }
 
-        .project-links a {
-          color: #666;
-          text-decoration: none;
-          margin-right: 12px;
+        .project .meta .lab {
+          color: #888;
         }
 
-        .project-links a:hover {
-          text-decoration: underline;
+        .project .meta .venue-name {
+          color: #555;
+        }
+
+        .project .meta .meta-sep {
+          color: #c5c5c5;
+          font-style: normal;
+        }
+
+        .project .meta .badge {
+          display: inline-block;
+          padding: 0 7px;
+          border-radius: 999px;
+          font-size: 10.5px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          line-height: 18px;
+          font-style: normal;
+          transform: translateY(-1px);
+        }
+
+        .project .meta .badge-oral {
+          background: #ec4872;
+          color: #fff;
         }
 
         .project p {
-          font-size: 15px;
           color: #555;
         }
 
@@ -137,44 +331,17 @@
           display: block;
         }
 
-        .experience {
-          margin-bottom: 20px;
-        }
-
-        .experience h3 {
-          font-size: 16px;
-          font-weight: 600;
-          color: #000;
-        }
-
-        .experience .company {
-          font-size: 14px;
-          color: #666;
-          margin-bottom: 4px;
-        }
-
-        .contact a {
-          color: #000;
-          text-decoration: none;
-          font-weight: 500;
-        }
-
-        .contact a:hover {
-          text-decoration: underline;
+        .decrypt-char {
+          display: inline;
         }
 
         @media (max-width: 480px) {
-          body {
-            padding: 40px 24px;
+          .content {
+            padding: 60px 20px 40px;
           }
-          
+
           h1 {
             font-size: 28px;
-          }
-          
-          .links {
-            flex-direction: column;
-            gap: 8px;
           }
 
           .project.with-video {
@@ -188,62 +355,336 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1>Ayaan Naveed Malik</h1>
-        <p class="tagline">CS, Math & Phil @ Stanford | NVIDIA</p>
-    </header>
+    <section class="landing">
+        <video class="landing-video" src="assets/starship_ascii.mp4" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+        <div class="landing-overlay"></div>
+        <div class="landing-inner">
+            <h1 class="landing-title"><span class="slash">/</span>AYAAN NAVEED MALIK<span class="slash">/</span></h1>
+            <nav class="landing-links" aria-label="Profiles">
+                <a href="https://scholar.google.com/citations?hl=en&amp;user=eQCqs3MAAAAJ" target="_blank" rel="noopener noreferrer">Google Scholar</a>
+                <span class="sep" aria-hidden="true">·</span>
+                <a href="https://www.linkedin.com/in/ayaannaveedmalik" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <span class="sep" aria-hidden="true">·</span>
+                <a href="https://x.com/ayaannmalik" target="_blank" rel="noopener noreferrer">Twitter</a>
+            </nav>
+        </div>
+        <a class="landing-scroll" href="#about" aria-label="Scroll to content">&#x2193;</a>
+    </section>
 
-    <main>
-        <section class="section">
-            <h2>About</h2>
-            <p>I’m a senior at Stanford passionate about multimodality, world models, and physical AI. I’m currently a student researcher at NVIDIA’s GEAR Lab, where I work on SOTA robotics foundation models,  world models, and everything in between. None of this would have been possible without the incredible mentors who have believed in me and guided me along the way—particularly Kezhen Chen, Joel Jang, and Jim Fan.</p>
-        </section>
-
-        <section class="section">
-            <h2>Work</h2>
-
-            <div class="project with-video">
-                <video autoplay loop muted playsinline>
-                    <source src="dreamzero_teaser.mp4" type="video/mp4">
-                </video>
-                <div class="project-text">
-                    <h3><a href="https://dreamzero0.github.io/">DreamZero: World Action Models are Zero-shot Policies</a></h3>
-                    <p class="role">Core Contributor</p>
-                    <p>A World Action Model built on a pretrained video diffusion backbone that jointly predicts future world states and actions, achieving over 2x improvement in generalization to new tasks and environments compared to state-of-the-art VLAs in real-robot experiments, with real-time closed-loop control at 7Hz.</p>
+    <div class="content">
+        <main>
+            <section class="section" id="about">
+                <div class="about-tldr">
+                    <img class="tldr-photo" src="assets/profile.png" alt="Ayaan Naveed Malik" />
+                    <div class="tldr-text">
+                        <h2>tl;dr</h2>
+                        <p>I am a senior at Stanford University studying Computer Science and Philosophy, and a research intern at <a class="highlight-link" href="https://research.nvidia.com/labs/gear/" target="_blank" rel="noopener noreferrer">NVIDIA GEAR</a> advised by <a class="highlight-link" href="https://jimfan.me/" target="_blank" rel="noopener noreferrer">Jim Fan</a> and <a class="highlight-link" href="https://yukezhu.me/" target="_blank" rel="noopener noreferrer">Yuke Zhu</a>. My research focuses on world modeling &amp; embodied AI. Reach out at ayaan04 [at] stanford [dot] edu.</p>
+                    </div>
                 </div>
-            </div>
+                <h2>what makes embodied intelligence, intelligent?</h2>
+                <p>The world does not arrive to an intelligent system already parsed into meaningful objects, causes, and possibilities for action. It arrives first as sensation &mdash; partial, noisy, local, and ambiguous. Yet somehow, from that stream, an agent forms something like a world: stable, structured, populated by enduring objects and actionable possibilities. That problem sits at the foundation of both intelligence and embodiment, and it&rsquo;s the one I keep returning to.</p>
+                <p>It is also not a new one. Aristotle&rsquo;s treatment of <a class="highlight-link" href="https://plato.stanford.edu/entries/aristotle-psychology/suppl4.html" target="_blank" rel="noopener noreferrer">phantasia</a> already points toward the idea that cognition is not exhausted by immediate perception: the mind retains and manipulates internally available appearances, guiding action even in the absence of the object itself. Helmholtz sharpens this: perception is not passive recording but unconscious inference &mdash; what we experience as a coherent external world is the mind reconstructing distal structure from impoverished sensory stimulation. Both suggest that intelligence is less a receiver than a constructor.</p>
+                <p>But the philosopher who presses this furthest is Wilfrid Sellars. His critique of the &ldquo;<a class="highlight-link" href="https://psyche.co/ideas/wilfrid-sellars-sensory-experience-and-the-myth-of-the-given" target="_blank" rel="noopener noreferrer">Myth of the Given</a>&rdquo; attacks a temptation that appears everywhere in both philosophy and engineering: that raw sensory input &mdash; however actively processed &mdash; can serve as a self-sufficient foundation for knowledge. Construction alone isn&rsquo;t enough. A sensory stream is not yet an intelligible world. Knowledge requires concepts, relations, inferential organization, explanatory integration. That insight translates directly into machine learning: a model does not become intelligent by ingesting pixels, tokens, or trajectories. The central problem is how observations are transformed into representations that capture latent structure and become predictive enough to support simulation, planning, and control.</p>
+                <p>Sellars&rsquo; distinction between the <em>manifest image</em> &mdash; the world as lived, of objects, persons, and intentions &mdash; and the <em>scientific image</em> &mdash; the world as hidden causes and dynamical laws &mdash; captures what I think about most. Intelligence lives at that interface: between appearance and explanation, between being embedded in the world and modeling it from within.</p>
+                <p>My research is motivated by exactly this. The technical questions I work on &mdash; representation learning, generative modeling, multimodality, world models, physical reasoning &mdash; are all downstream of a more fundamental one: how does a system come not merely to observe the world, but to model it well enough to act within it? To me, that is one of the deepest open problems in physical AGI, and the place where philosophy and engineering most honestly converge.</p>
+            </section>
 
-            <div class="project with-video">
-                <video autoplay loop muted playsinline>
-                    <source src="dreamdojo_teaser.mp4" type="video/mp4">
-                </video>
-                <div class="project-text">
-                    <h3><a href="https://dreamdojo-world.github.io/">DreamDojo: A Generalist Robot World Model from Large-Scale Human Videos</a></h3>
-                    <p class="role">Core Contributor</p>
-                    <p>A foundation world model pretrained on 44k hours of diverse human egocentric videos—the largest dataset to date for world model pretraining—that demonstrates strong generalization to diverse objects and environments, with stable real-time interactions at 10 FPS for over 1 minute after distillation.</p>
+            <section class="section" id="work">
+                <h2>work</h2>
+
+                <div class="project with-video">
+                    <video autoplay loop muted playsinline>
+                        <source src="assets/dreamzero_teaser.mp4" type="video/mp4">
+                    </video>
+                    <div class="project-text">
+                        <h3><a href="https://dreamzero0.github.io/">DreamZero: World Action Models are Zero-shot Policies</a></h3>
+                        <p class="meta"><span class="lab">NVIDIA GEAR</span><span class="meta-sep">·</span><span class="venue-name">ICLR 2026 Workshop on World Models</span><span class="badge badge-oral">Oral</span></p>
+                        <p>A World Action Model built on a pretrained video diffusion backbone that jointly predicts future world states and actions, achieving over 2x improvement in generalization to new tasks and environments compared to state-of-the-art VLAs in real-robot experiments, with real-time closed-loop control at 7Hz.</p>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <section class="section">
-            <h2>Previously...</h2>
-            
-            <div class="project">
-                <p>I joined Together AI during Series A, researching on compute-efficient architectures and recipes for post-training LLM's to become natively multimodal, capable of both perception and generation. (advised by Kezhen Chen).</p>
-            </div>
+                <div class="project with-video">
+                    <video autoplay loop muted playsinline>
+                        <source src="assets/dreamdojo_teaser.mp4" type="video/mp4">
+                    </video>
+                    <div class="project-text">
+                        <h3><a href="https://dreamdojo-world.github.io/">DreamDojo: A Generalist Robot World Model from Large-Scale Human Videos</a></h3>
+                        <p class="meta"><span class="lab">NVIDIA GEAR</span></p>
+                        <p>A foundation world model pretrained on 44k hours of diverse human egocentric videos—the largest dataset to date for world model pretraining—that demonstrates strong generalization to diverse objects and environments, with stable real-time interactions at 10 FPS for over 1 minute after distillation.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script>
+// Landing hero decrypt — runs once on load, no scroll dependency.
+// - Targets the name and the social links only.
+// - Keeps the chars' existing color (white), so the scramble looks like the
+//   text "resolving into view" rather than a tinted reveal.
+// - Staggered unlock with small jitter so it doesn't feel robotic.
+(function () {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-            <div class="project">
-                <p>At the Stanford AI Lab, I researched on lambda-calculus based proof system with a finite action space, making RL tractable and enabling agents to discover tactics and emergent curricula (advised by Gabriel Poesia and Noah Goodman).</p>
-            </div>
+  var CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-*/|:;[]{}<>@#$%&";
 
-            <div class="project">
-                <p>I spent a summer teaching LLM's the art of geometric reasoning to solve <a href="https://www.euclidea.xyz/">euclidia.xyz</a> (advised by Henryk Michalewski and Mateusz Malinowski).</p>
-            </div>
+  function randomChar() {
+    return CHARSET.charAt((Math.random() * CHARSET.length) | 0);
+  }
 
-            <div class="project">
-              <p>I fell in love with proof-writing, competing in various international olympiads for Pakistan.</p>
-          </div>
-        </section>
-    </main>
+  function wrapAndCollect(node, bucket) {
+    if (node.nodeType === 3) {
+      var t = node.textContent;
+      if (!t) return;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < t.length; i++) {
+        var ch = t.charAt(i);
+        var span = document.createElement("span");
+        if (/\s/.test(ch)) {
+          span.textContent = ch;
+        } else {
+          span.setAttribute("data-final", ch);
+          span.textContent = randomChar();
+          bucket.push(span);
+        }
+        frag.appendChild(span);
+      }
+      node.parentNode.replaceChild(frag, node);
+      return;
+    }
+    if (node.nodeType === 1) {
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var j = 0; j < kids.length; j++) wrapAndCollect(kids[j], bucket);
+    }
+  }
+
+  function run() {
+    var roots = document.querySelectorAll(".landing-title, .landing-links a");
+    var groups = [];
+    var all = [];
+    for (var r = 0; r < roots.length; r++) {
+      var bucket = [];
+      wrapAndCollect(roots[r], bucket);
+      if (bucket.length) {
+        groups.push(bucket);
+        for (var g = 0; g < bucket.length; g++) all.push(bucket[g]);
+      }
+    }
+    if (!all.length) return;
+
+    // Each group (name + each link) is spread across the same total duration,
+    // so every group finishes decoding at roughly the same time.
+    var start = performance.now();
+    var preRoll = 140;
+    var duration = 900;
+    var jitter = 140;
+    for (var gi = 0; gi < groups.length; gi++) {
+      var gchars = groups[gi];
+      var denom = Math.max(1, gchars.length - 1);
+      for (var ci = 0; ci < gchars.length; ci++) {
+        var progress = gchars.length === 1 ? 1 : ci / denom;
+        gchars[ci]._unlockAt = start + preRoll + progress * duration + Math.random() * jitter;
+      }
+    }
+
+    function frame(now) {
+      var pending = false;
+      for (var c = 0; c < all.length; c++) {
+        var s = all[c];
+        if (s._done) continue;
+        if (now >= s._unlockAt) {
+          s.textContent = s.getAttribute("data-final");
+          s.removeAttribute("data-final");
+          s._done = true;
+          continue;
+        }
+        pending = true;
+        if (Math.random() < 0.4) s.textContent = randomChar();
+      }
+      if (pending) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else {
+    run();
+  }
+})();
+    </script>
+    <script>
+// Scroll-driven decryption reveal.
+// - Text is wrapped per-character; all non-space chars start as random scramble
+//   glyphs tinted with the page's pink accent (#ec4872).
+// - A "reveal line" sits at ~68% of viewport height (comfortable reading zone).
+//   Any character whose document-space top is above that line gets settled and
+//   fades to the final glyph/color.
+// - Scroll velocity pushes the reveal line further down (up to ~96% of viewport),
+//   so fast scrolling never leaves scrambled characters in the user's reading
+//   path. Slow scrolling keeps a small decryption band near the viewport bottom.
+// - Off-screen paragraphs are inert (frozen scramble frame, no work).
+// - `prefers-reduced-motion: reduce` disables the effect entirely.
+(function () {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  var CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-*/|:;[]{}<>@#$%&";
+  var SCRAMBLE_COLOR = "#ec4872";
+
+  function randomChar() {
+    return CHARSET.charAt((Math.random() * CHARSET.length) | 0);
+  }
+
+  function wrapTextNodes(node, bucket) {
+    if (node.nodeType === 3) {
+      var t = node.textContent;
+      if (!t) return;
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < t.length; i++) {
+        var ch = t.charAt(i);
+        var span = document.createElement("span");
+        span.className = "decrypt-char";
+        if (/\s/.test(ch)) {
+          span.textContent = ch;
+        } else {
+          span.setAttribute("data-final", ch);
+          span.textContent = randomChar();
+          span.style.color = SCRAMBLE_COLOR;
+          bucket.push(span);
+        }
+        frag.appendChild(span);
+      }
+      node.parentNode.replaceChild(frag, node);
+      return;
+    }
+    if (node.nodeType === 1) {
+      var tag = node.tagName;
+      if (tag === "SCRIPT" || tag === "STYLE") return;
+      var kids = Array.prototype.slice.call(node.childNodes);
+      for (var j = 0; j < kids.length; j++) wrapTextNodes(kids[j], bucket);
+    }
+  }
+
+  function init() {
+    var targets = document.querySelectorAll(
+      "#about h2, #about p, #work h2, .project-text h3, .project-text p, .project .role"
+    );
+    if (!targets.length) return;
+
+    var paragraphs = [];
+    var byEl = new WeakMap();
+
+    for (var t = 0; t < targets.length; t++) {
+      var bucket = [];
+      wrapTextNodes(targets[t], bucket);
+      if (!bucket.length) continue;
+      var para = { el: targets[t], chars: bucket, cached: false, active: false, pending: bucket.length };
+      paragraphs.push(para);
+      byEl.set(targets[t], para);
+    }
+    if (!paragraphs.length) return;
+
+    function cachePara(para) {
+      if (para.cached) return;
+      var scrollY = window.scrollY || window.pageYOffset || 0;
+      var chars = para.chars;
+      for (var i = 0; i < chars.length; i++) {
+        var rect = chars[i].getBoundingClientRect();
+        chars[i]._docY = rect.top + scrollY;
+      }
+      para.cached = true;
+    }
+
+    function invalidate() {
+      for (var i = 0; i < paragraphs.length; i++) paragraphs[i].cached = false;
+    }
+    window.addEventListener("resize", invalidate);
+    if ("fonts" in document) {
+      document.fonts.ready.then(invalidate).catch(function () {});
+    }
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        for (var e = 0; e < entries.length; e++) {
+          var para = byEl.get(entries[e].target);
+          if (!para) continue;
+          para.active = entries[e].isIntersecting;
+          if (para.active) cachePara(para);
+        }
+      },
+      { rootMargin: "400px 0px 800px 0px", threshold: 0 }
+    );
+    for (var p = 0; p < paragraphs.length; p++) io.observe(paragraphs[p].el);
+
+    // Smoothed scroll velocity in pixels/ms.
+    var lastY = window.scrollY || 0;
+    var lastT = performance.now();
+    var velocity = 0;
+    window.addEventListener(
+      "scroll",
+      function () {
+        var now = performance.now();
+        var y = window.scrollY || 0;
+        var dt = Math.max(1, now - lastT);
+        var instant = Math.abs(y - lastY) / dt;
+        velocity = velocity * 0.55 + instant * 0.45;
+        lastY = y;
+        lastT = now;
+      },
+      { passive: true }
+    );
+
+    function frame() {
+      velocity *= 0.9;
+      var vh = window.innerHeight;
+      var scrollY = window.scrollY || 0;
+
+      // Base reveal line sits low in the viewport so decoding stays ahead of
+      // the reader's eye; velocity pushes it further down toward the edge.
+      var base = 0.78;
+      var boost = Math.min(velocity * 0.08, 0.16);
+      var ratio = Math.min(0.98, base + boost);
+      // Push the reveal line ~100px earlier so decoding stays slightly ahead
+      // of the reading zone without running too far ahead.
+      var revealDocY = scrollY + vh * ratio + 120;
+
+      // If the user has hit the scroll floor (last paragraph sitting above the
+      // reveal line with nothing to scroll into), resolve everything still in
+      // view so the final block never gets stuck mid-decrypt.
+      var docH = document.documentElement.scrollHeight;
+      if (scrollY + vh >= docH - 2) revealDocY = docH + vh;
+
+      for (var pi = 0; pi < paragraphs.length; pi++) {
+        var para = paragraphs[pi];
+        if (!para.active || !para.pending) continue;
+        if (!para.cached) cachePara(para);
+        var chars = para.chars;
+        for (var i = 0; i < chars.length; i++) {
+          var s = chars[i];
+          if (!s.hasAttribute("data-final")) continue;
+          if (s._docY <= revealDocY) {
+            s.textContent = s.getAttribute("data-final");
+            s.removeAttribute("data-final");
+            s.style.transition = "color 0.42s ease";
+            s.style.color = "";
+            para.pending--;
+          } else if (Math.random() < 0.16) {
+            s.textContent = randomChar();
+          }
+        }
+        if (para.pending === 0) io.unobserve(para.el);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+    </script>
 </body>
 </html>

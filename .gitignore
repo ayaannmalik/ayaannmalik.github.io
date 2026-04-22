@@ -1,0 +1,6 @@
+# Local build artifacts / large source clips not needed for the deployed site.
+assets/starship_clip.mp4
+
+# OS / editor noise
+.DS_Store
+*.swp
