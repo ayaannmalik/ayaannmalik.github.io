@@ -223,6 +223,55 @@
           }
         }
 
+        .brain-wrap {
+          flex-shrink: 0;
+          width: 320px;
+          height: 280px;
+          position: relative;
+          cursor: grab;
+          touch-action: none;
+          user-select: none;
+        }
+
+        .brain-wrap:active { cursor: grabbing; }
+
+        .brain-wrap canvas {
+          display: block;
+          width: 100%;
+          height: 100%;
+        }
+
+        .brain-hint {
+          position: absolute;
+          right: 4px;
+          bottom: 2px;
+          font-family: "Lucida Grande", "Lucida Sans Unicode", "Helvetica Neue", Helvetica, sans-serif;
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: rgba(0,0,0,0.28);
+          pointer-events: none;
+          transition: opacity 0.6s ease;
+        }
+
+        .brain-wrap.touched .brain-hint { opacity: 0; }
+
+        @media (max-width: 920px) {
+          .about-tldr { flex-wrap: wrap; }
+          .brain-wrap {
+            order: 3;
+            width: 100%;
+            max-width: 420px;
+            height: 260px;
+            margin: 4px auto 0;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .brain-wrap { display: none; }
+        }
+
         .highlight-link {
           color: inherit;
           text-decoration: underline;
@@ -380,6 +429,10 @@
                         <h2>tl;dr</h2>
                         <p>I am a senior at Stanford University studying Computer Science and Philosophy, and a research intern at <a class="highlight-link" href="https://research.nvidia.com/labs/gear/" target="_blank" rel="noopener noreferrer">NVIDIA GEAR</a> advised by <a class="highlight-link" href="https://jimfan.me/" target="_blank" rel="noopener noreferrer">Jim Fan</a> and <a class="highlight-link" href="https://yukezhu.me/" target="_blank" rel="noopener noreferrer">Yuke Zhu</a>. My research focuses on world modeling &amp; embodied AI. Reach out at ayaan04 [at] stanford [dot] edu.</p>
                     </div>
+                    <div class="brain-wrap" aria-hidden="true">
+                        <canvas id="brain-graph"></canvas>
+                        <div class="brain-hint">drag to rotate</div>
+                    </div>
                 </div>
                 <h2>what makes embodied intelligence, intelligent?</h2>
                 <p>The world does not arrive to an intelligent system already parsed into meaningful objects, causes, and possibilities for action. It arrives first as sensation &mdash; partial, noisy, local, and ambiguous. Yet somehow, from that stream, an agent forms something like a world: stable, structured, populated by enduring objects and actionable possibilities. That problem sits at the foundation of both intelligence and embodiment, and it&rsquo;s the one I keep returning to.</p>
@@ -409,7 +462,7 @@
                     </video>
                     <div class="project-text">
                         <h3><a href="https://dreamdojo-world.github.io/">DreamDojo: A Generalist Robot World Model from Large-Scale Human Videos</a></h3>
-                        <p class="meta"><span class="lab">NVIDIA GEAR</span></p>
+                        <p class="meta"><span class="lab">NVIDIA GEAR</span><span class="meta-sep">·</span><span class="venue-name">ICML 2026</span><span class="badge badge-oral">Spotlight</span></p>
                         <p>A foundation world model pretrained on 44k hours of diverse human egocentric videos—the largest dataset to date for world model pretraining—that demonstrates strong generalization to diverse objects and environments, with stable real-time interactions at 10 FPS for over 1 minute after distillation.</p>
                     </div>
                 </div>
@@ -683,6 +736,514 @@
     document.addEventListener("DOMContentLoaded", init);
   } else {
     init();
+  }
+})();
+    </script>
+    <script>
+// 3-D revolving knowledge graph — brain-shaped ellipsoid.
+// CS/ML nodes cluster on the right hemisphere, philosophy on the left,
+// bridging concepts (perception, intelligence, world) glow pink in the middle.
+// Interactive: drag to rotate, inertia + auto-rotation resume on release,
+// hover highlights nearest node + its connections.
+(function () {
+  var canvas = document.getElementById('brain-graph');
+  if (!canvas || !canvas.getContext) return;
+  var wrap = canvas.parentNode;
+
+  var ctx = canvas.getContext('2d');
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var CW = 320, CH = 280;
+
+  function resize() {
+    var rect = wrap.getBoundingClientRect();
+    CW = Math.max(220, Math.round(rect.width));
+    CH = Math.max(200, Math.round(rect.height));
+    canvas.width  = CW * dpr;
+    canvas.height = CH * dpr;
+    canvas.style.width  = CW + 'px';
+    canvas.style.height = CH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    CX = CW / 2;
+    CY = CH / 2 + 4;
+    var s = Math.min(CW / 320, CH / 280);
+    RX = 96 * s;  RY = 70 * s;  RZ = 84 * s;
+  }
+
+  var CX, CY, RX, RY, RZ;
+  var FOV  = 360;   // perspective focal length
+  var TILT = 0.22;  // base X-axis tilt
+  resize();
+  window.addEventListener('resize', resize);
+
+  // ── Node definitions ──────────────────────────────────────────────────────
+  var DEFS = [
+    // CS / ML  (15)
+    { label: 'world models',    cat: 'cs',     imp: 3 },
+    { label: 'embodied AI',     cat: 'cs',     imp: 3 },
+    { label: 'diffusion',       cat: 'cs',     imp: 2 },
+    { label: 'latent space',    cat: 'cs',     imp: 2 },
+    { label: 'transformers',    cat: 'cs',     imp: 2 },
+    { label: 'RL',              cat: 'cs',     imp: 1 },
+    { label: 'control',         cat: 'cs',     imp: 2 },
+    { label: 'sim2real',        cat: 'cs',     imp: 1 },
+    { label: 'video models',    cat: 'cs',     imp: 2 },
+    { label: 'representation',  cat: 'cs',     imp: 2 },
+    { label: 'robotics',        cat: 'cs',     imp: 2 },
+    { label: 'VLA',             cat: 'cs',     imp: 1 },
+    { label: 'planning',        cat: 'cs',     imp: 1 },
+    { label: 'generalization',  cat: 'cs',     imp: 2 },
+    { label: '\u2207 descent',  cat: 'cs',     imp: 1 },
+    // Bridge  (7) — appear pink, connect both sides
+    { label: 'intelligence',    cat: 'bridge', imp: 3 },
+    { label: 'perception',      cat: 'bridge', imp: 3 },
+    { label: 'world',           cat: 'bridge', imp: 3 },
+    { label: 'sensation',       cat: 'bridge', imp: 2 },
+    { label: 'action',          cat: 'bridge', imp: 2 },
+    { label: 'AGI',             cat: 'bridge', imp: 2 },
+    { label: 'simulation',      cat: 'bridge', imp: 2 },
+    // Philosophy  (10)
+    { label: 'phantasia',       cat: 'philo',  imp: 3 },
+    { label: 'Sellars',         cat: 'philo',  imp: 3 },
+    { label: 'Helmholtz',       cat: 'philo',  imp: 2 },
+    { label: 'Aristotle',       cat: 'philo',  imp: 2 },
+    { label: 'manifest image',  cat: 'philo',  imp: 2 },
+    { label: 'consciousness',   cat: 'philo',  imp: 2 },
+    { label: 'affordance',      cat: 'philo',  imp: 1 },
+    { label: 'qualia',          cat: 'philo',  imp: 1 },
+    { label: 'inference',       cat: 'philo',  imp: 2 },
+    { label: 'the given',       cat: 'philo',  imp: 2 },
+  ];
+
+  var N = DEFS.length;
+
+  // ── Distribute nodes on ellipsoid via Fibonacci sphere ────────────────────
+  // Sort by x so categories cluster into hemispheres.
+  var golden = Math.PI * (3 - Math.sqrt(5));
+  var fibPts = [];
+  for (var i = 0; i < N; i++) {
+    var yy = 1 - (i / (N - 1)) * 2;
+    var rr = Math.sqrt(Math.max(0, 1 - yy * yy));
+    var th = golden * i;
+    fibPts.push({ x: Math.cos(th) * rr, y: yy, z: Math.sin(th) * rr });
+  }
+  // x-descending: right side → CS, middle → Bridge, left → Philosophy
+  fibPts.sort(function (a, b) { return b.x - a.x; });
+
+  var csPool = DEFS.filter(function (d) { return d.cat === 'cs'; });
+  var brPool = DEFS.filter(function (d) { return d.cat === 'bridge'; });
+  var phPool = DEFS.filter(function (d) { return d.cat === 'philo'; });
+  var ci = 0, bi = 0, pi_ = 0;
+
+  // Unit-sphere positions; we multiply by RX/RY/RZ each frame so resize works.
+  var nodes = fibPts.map(function (p, idx) {
+    var def = idx < 15 ? csPool[ci++] : idx < 22 ? brPool[bi++] : phPool[pi_++];
+    return { ux: p.x, uy: p.y, uz: p.z,
+             label: def.label, cat: def.cat, imp: def.imp,
+             phase: Math.random() * 6.2832 };
+  });
+
+  // ── Build k-NN edges (k = 3) on unit positions ────────────────────────────
+  var seen = {}, EDGES = [];
+  for (var i = 0; i < N; i++) {
+    var ds = [];
+    for (var j = 0; j < N; j++) {
+      if (i === j) continue;
+      var dx = nodes[i].ux - nodes[j].ux;
+      var dy = nodes[i].uy - nodes[j].uy;
+      var dz = nodes[i].uz - nodes[j].uz;
+      ds.push([j, dx*dx + dy*dy + dz*dz]);
+    }
+    ds.sort(function (a, b) { return a[1] - b[1]; });
+    for (var k = 0; k < 3; k++) {
+      var jj = ds[k][0];
+      var key = (i < jj ? i + '_' + jj : jj + '_' + i);
+      if (!seen[key]) { seen[key] = 1; EDGES.push([i, jj]); }
+    }
+  }
+
+  // Track which edges connect to each node for hover-highlighting.
+  var nodeEdges = nodes.map(function () { return []; });
+  for (var e = 0; e < EDGES.length; e++) {
+    nodeEdges[EDGES[e][0]].push(e);
+    nodeEdges[EDGES[e][1]].push(e);
+  }
+
+  // ── Color helpers ─────────────────────────────────────────────────────────
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    return [parseInt(hex.substr(0,2),16), parseInt(hex.substr(2,2),16), parseInt(hex.substr(4,2),16)];
+  }
+  function rgba(rgb, a) {
+    return 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + a + ')';
+  }
+  function shade(rgb, f) {
+    if (f >= 0) return [
+      Math.round(rgb[0] + (255 - rgb[0]) * f),
+      Math.round(rgb[1] + (255 - rgb[1]) * f),
+      Math.round(rgb[2] + (255 - rgb[2]) * f)
+    ];
+    var m = 1 + f;
+    return [Math.round(rgb[0]*m), Math.round(rgb[1]*m), Math.round(rgb[2]*m)];
+  }
+  // Tuned for a pure-white background.
+  var COLORS = {
+    cs:     hexToRgb('#1f1f24'),
+    bridge: hexToRgb('#ec4872'),
+    philo:  hexToRgb('#5a6c80')
+  };
+
+  // ── 3-D helpers ───────────────────────────────────────────────────────────
+  function rotY(x, y, z, a) {
+    var c = Math.cos(a), s = Math.sin(a);
+    return [x*c + z*s, y, -x*s + z*c];
+  }
+  function rotX(x, y, z, a) {
+    var c = Math.cos(a), s = Math.sin(a);
+    return [x, y*c - z*s, y*s + z*c];
+  }
+  function rotZ(x, y, z, a) {
+    var c = Math.cos(a), s = Math.sin(a);
+    return [x*c - y*s, x*s + y*c, z];
+  }
+  function project(x, y, z) {
+    var sc = FOV / (FOV + z);
+    return { px: CX + x*sc, py: CY + y*sc, z: z, sc: sc };
+  }
+  function dn(z) { return Math.max(0, Math.min(1, 0.5 - z / (2 * RZ))); }
+
+  // ── Decrypt charset (matches the page's existing scramble effect) ─────────
+  var CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-*/|:;[]{}<>@#$%&";
+  function randomChar() {
+    return CHARSET.charAt((Math.random() * CHARSET.length) | 0);
+  }
+
+  // Per-node decrypt state.
+  for (var ni = 0; ni < N; ni++) {
+    nodes[ni].labelAt   = -1;  // ts when label entered view; -1 = not shown
+    nodes[ni].leavingAt = -1;  // ts when label started leaving; -1 = not leaving
+  }
+
+  // ── Interaction state ─────────────────────────────────────────────────────
+  var dragging = false;
+  var lastPX = 0, lastPY = 0;
+  var userYaw = 0, userPitch = 0;
+  var yawVel = 0, pitchVel = 0;
+  var hoverX = -1, hoverY = -1;
+  var hoveredIdx = -1;
+  var lastInteract = -1e9;
+  var autoYaw = 0;
+
+  function onDown(e) {
+    dragging = true;
+    lastPX = e.clientX; lastPY = e.clientY;
+    yawVel = 0; pitchVel = 0;
+    wrap.classList.add('touched');
+    if (canvas.setPointerCapture && e.pointerId !== undefined) {
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    }
+    e.preventDefault();
+  }
+  function onMove(e) {
+    var rect = canvas.getBoundingClientRect();
+    hoverX = e.clientX - rect.left;
+    hoverY = e.clientY - rect.top;
+    if (!dragging) return;
+    var dx = e.clientX - lastPX;
+    var dy = e.clientY - lastPY;
+    userYaw   += dx * 0.011;
+    userPitch += dy * 0.011;
+    userPitch = Math.max(-1.0, Math.min(1.0, userPitch));
+    yawVel   = dx * 0.011;
+    pitchVel = dy * 0.011;
+    lastPX = e.clientX; lastPY = e.clientY;
+    lastInteract = performance.now();
+  }
+  function onUp() {
+    dragging = false;
+    lastInteract = performance.now();
+  }
+  function onLeave() { hoverX = -1; hoverY = -1; }
+
+  if ('PointerEvent' in window) {
+    canvas.addEventListener('pointerdown', onDown);
+    canvas.addEventListener('pointermove', onMove);
+    canvas.addEventListener('pointerup', onUp);
+    canvas.addEventListener('pointercancel', onUp);
+    canvas.addEventListener('pointerleave', onLeave);
+  } else {
+    canvas.addEventListener('mousedown', onDown);
+    canvas.addEventListener('mousemove', onMove);
+    canvas.addEventListener('mouseup', onUp);
+    canvas.addEventListener('mouseleave', onLeave);
+  }
+
+  // ── Render loop ───────────────────────────────────────────────────────────
+  // Three independent auto-rotation accumulators give a true 3-D tumble
+  // (yaw + pitch + roll) at coprime rates so the figure never repeats exactly.
+  var LABEL_FONT = '"Lucida Grande","Lucida Sans Unicode","Helvetica Neue",Helvetica,sans-serif';
+
+  var lastTs = 0;
+  var autoPitch = 0, autoRoll = 0;
+  function frame(ts) {
+    var dt = lastTs ? Math.min(64, ts - lastTs) : 16;
+    lastTs = ts;
+    var dtN = dt / 16;
+
+    // Auto-rotation resumes ~1.6 s after the last interaction, ramps over 1.4 s.
+    var sinceInteract = ts - lastInteract;
+    var autoFactor = dragging ? 0
+                     : Math.min(1, Math.max(0, (sinceInteract - 1600) / 1400));
+    autoYaw   += autoFactor * 0.00040 * dt;
+    autoPitch += autoFactor * 0.00013 * dt;
+    autoRoll  += autoFactor * 0.00009 * dt;
+
+    if (!dragging) {
+      userYaw   += yawVel   * dtN;
+      userPitch += pitchVel * dtN;
+      var decay = Math.pow(0.93, dtN);
+      yawVel   *= decay;
+      pitchVel *= decay;
+      userPitch = Math.max(-1.0, Math.min(1.0, userPitch));
+      if (autoFactor > 0.6 && Math.abs(yawVel) < 0.0008 && Math.abs(pitchVel) < 0.0008) {
+        userPitch *= Math.pow(0.985, dtN);
+      }
+    }
+
+    // Compose the final orientation: smooth wobbling pitch + roll
+    // around the user-controlled offsets, plus accumulating yaw.
+    var yaw   = autoYaw + userYaw;
+    var pitch = TILT + userPitch + Math.sin(autoPitch) * 0.20;
+    var roll  = Math.sin(autoRoll) * 0.18;
+
+    // Pure transparent clear — the white page shows through.
+    ctx.clearRect(0, 0, CW, CH);
+
+    // Project every node (with very subtle breathing).
+    var P = new Array(N);
+    for (var i = 0; i < N; i++) {
+      var n = nodes[i];
+      var pulse = 1 + Math.sin(ts * 0.0011 + n.phase) * 0.012;
+      var r0 = rotZ(n.ux * RX * pulse, n.uy * RY * pulse, n.uz * RZ * pulse, roll);
+      var r1 = rotY(r0[0], r0[1], r0[2], yaw);
+      var r2 = rotX(r1[0], r1[1], r1[2], pitch);
+      P[i] = project(r2[0], r2[1], r2[2]);
+    }
+
+    // Hover detection: nearest projected node within ~16 px (front-most wins).
+    hoveredIdx = -1;
+    if (hoverX >= 0 && !dragging) {
+      var bestD2 = 16 * 16;
+      var orderH = []; for (var ii = 0; ii < N; ii++) orderH.push(ii);
+      orderH.sort(function (a, b) { return P[a].z - P[b].z; }); // front first
+      for (var hi = 0; hi < orderH.length; hi++) {
+        var idx = orderH[hi];
+        var ddx = P[idx].px - hoverX, ddy = P[idx].py - hoverY;
+        var d2 = ddx*ddx + ddy*ddy;
+        if (d2 < bestD2) { bestD2 = d2; hoveredIdx = idx; break; }
+      }
+    }
+
+    // ── Edges (clean strokes, normal blend on white) ───────────────────────
+    for (var e = 0; e < EDGES.length; e++) {
+      var ia = EDGES[e][0], ib = EDGES[e][1];
+      var pa = P[ia], pb = P[ib];
+      var d  = dn((pa.z + pb.z) / 2);
+      var hot = nodes[ia].cat === 'bridge' || nodes[ib].cat === 'bridge';
+      var hov = (hoveredIdx === ia || hoveredIdx === ib);
+      var col, alpha;
+      if (hov) {
+        col = '236,72,114'; alpha = 0.55 + d * 0.30;
+      } else if (hot) {
+        col = '236,72,114'; alpha = 0.10 + d * 0.22;
+      } else {
+        col = '40,46,58';   alpha = 0.06 + d * 0.18;
+      }
+      ctx.strokeStyle = 'rgba(' + col + ',' + alpha.toFixed(3) + ')';
+      ctx.lineWidth = (hot ? 0.7 : 0.5) + d * 0.35 + (hov ? 0.6 : 0);
+      ctx.beginPath();
+      ctx.moveTo(pa.px, pa.py);
+      ctx.lineTo(pb.px, pb.py);
+      ctx.stroke();
+    }
+
+    // ── Nodes — back-to-front painter's order ──────────────────────────────
+    var order = []; for (var ii2 = 0; ii2 < N; ii2++) order.push(ii2);
+    order.sort(function (a, b) { return P[b].z - P[a].z; });
+
+    for (var oi = 0; oi < order.length; oi++) {
+      var i2 = order[oi];
+      var p = P[i2], n2 = nodes[i2];
+      var dep = dn(p.z);
+      var hov2 = i2 === hoveredIdx;
+      var baseR = n2.imp === 3 ? 3.6 : n2.imp === 2 ? 2.6 : 1.7;
+      var r = baseR * (0.7 + dep * 0.5) * (hov2 ? 1.45 : 1);
+      var rgb = COLORS[n2.cat];
+
+      // Soft pink wash for high-importance bridge nodes when they're forward.
+      if (n2.cat === 'bridge' && n2.imp >= 2 && dep > 0.35) {
+        var hr = r * 4.2;
+        var halo = ctx.createRadialGradient(p.px, p.py, 0, p.px, p.py, hr);
+        var ha = 0.18 * (dep - 0.35) / 0.65;
+        halo.addColorStop(0, 'rgba(236,72,114,' + ha.toFixed(3) + ')');
+        halo.addColorStop(0.45, 'rgba(236,72,114,' + (ha * 0.35).toFixed(3) + ')');
+        halo.addColorStop(1, 'rgba(236,72,114,0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, hr, 0, 6.2832);
+        ctx.fill();
+      }
+
+      // Hover halo + clean accent ring.
+      if (hov2) {
+        var hr2 = r * 5;
+        var hh = ctx.createRadialGradient(p.px, p.py, 0, p.px, p.py, hr2);
+        hh.addColorStop(0, 'rgba(236,72,114,0.20)');
+        hh.addColorStop(0.4, 'rgba(236,72,114,0.07)');
+        hh.addColorStop(1, 'rgba(236,72,114,0)');
+        ctx.fillStyle = hh;
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, hr2, 0, 6.2832);
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(236,72,114,0.55)';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.arc(p.px, p.py, r * 1.65, 0, 6.2832);
+        ctx.stroke();
+      }
+
+      // Flat solid disc — clean, high-contrast on white.
+      var nodeAlpha = 0.55 + dep * 0.45;
+      ctx.fillStyle = rgba(rgb, nodeAlpha);
+      ctx.beginPath();
+      ctx.arc(p.px, p.py, r, 0, 6.2832);
+      ctx.fill();
+
+      // ── Label: decrypt-in / re-encrypt-out ─────────────────────────────────
+      var ENTER_DEP = 0.58;  // depth at which decrypt begins (node is visibly front)
+      var LEAVE_DEP = 0.44;  // depth at which re-encrypt begins (node drifting back)
+      var LEAVE_MS  = 900;   // re-encryption + fade-out total duration
+
+      var entering = dep >= ENTER_DEP;
+
+      if (hov2) {
+        // Hover always shows; if mid-leave or never entered, restart decrypt.
+        if (n2.leavingAt >= 0 || n2.labelAt < 0) {
+          n2.leavingAt = -1;
+          n2.labelAt   = ts;
+          n2._sc       = null;
+        }
+      } else {
+        if (entering && n2.labelAt < 0 && n2.leavingAt < 0) {
+          n2.labelAt = ts;
+          n2._sc     = null;
+        }
+        if (!entering && n2.labelAt >= 0 && n2.leavingAt < 0) {
+          n2.leavingAt = ts;  // start re-encrypt
+        }
+        if (entering && n2.leavingAt >= 0) {
+          // Rotated back in before leave finished — restart decrypt fresh.
+          n2.leavingAt = -1;
+          n2.labelAt   = ts;
+          n2._sc       = null;
+        }
+        if (n2.leavingAt >= 0 && (ts - n2.leavingAt) >= LEAVE_MS) {
+          n2.labelAt = -1; n2.leavingAt = -1; n2._sc = null;
+        }
+      }
+
+      // Only imp ≥ 2 get labels (or anything hovered).
+      var showLabel = (n2.labelAt >= 0) && (hov2 || n2.imp >= 2);
+
+      if (showLabel) {
+        var leaving = n2.leavingAt >= 0;
+        var la;
+        if (hov2) {
+          la = 1;
+        } else if (leaving) {
+          // Fade out linearly over the leave window.
+          la = 1 - Math.min(1, (ts - n2.leavingAt) / LEAVE_MS);
+        } else {
+          // Fade in: 0 at ENTER_DEP, 1 at ENTER_DEP + 0.22.
+          la = Math.min(1, (dep - ENTER_DEP) / 0.22);
+        }
+
+        if (la > 0.01) {
+          var fs = hov2 ? 11.5 : Math.max(9.0, Math.min(10.5, 9.4 * p.sc));
+          ctx.font = (hov2 ? '600 ' : '500 ') + (Math.round(fs * 10) / 10) + 'px ' + LABEL_FONT;
+          ctx.textBaseline = 'middle';
+          ctx.textAlign = 'left';
+
+          var label = n2.label;
+          var widths = new Array(label.length);
+          var totalW = 0;
+          for (var ci2 = 0; ci2 < label.length; ci2++) {
+            widths[ci2] = ctx.measureText(label.charAt(ci2)).width;
+            totalW += widths[ci2];
+          }
+
+          var flipLeft = p.px > CX;
+          var startX = flipLeft ? (p.px - r - 6 - totalW) : (p.px + r + 6);
+          var elapsed = ts - n2.labelAt;
+          var settledRgb = hov2 ? shade(rgb, -0.20) : rgb;
+
+          if (!n2._sc) {
+            n2._sc = new Array(label.length);
+            for (var si2 = 0; si2 < label.length; si2++) n2._sc[si2] = randomChar();
+          }
+
+          ctx.save();
+          ctx.globalAlpha = la;
+          var x = startX;
+          for (var cj2 = 0; cj2 < label.length; cj2++) {
+            var ch2 = label.charAt(cj2);
+            if (ch2 === ' ') { x += widths[cj2]; continue; }
+
+            if (leaving) {
+              // Re-encrypt: all chars scramble back to random glyphs.
+              if (Math.random() < 0.40) n2._sc[cj2] = randomChar();
+              ctx.fillStyle = '#ec4872';
+              ctx.fillText(n2._sc[cj2], x, p.py);
+            } else {
+              // Decrypt-in: staggered unlock, 55 ms per char gap.
+              // Total scramble window = 120 + (len-1)*55 ms ≈ 700 ms for 11 chars.
+              var unlockAt = 120 + cj2 * 55;
+              var locked   = elapsed < unlockAt;
+              if (locked) {
+                if (Math.random() < 0.40) n2._sc[cj2] = randomChar();
+                ctx.fillStyle = '#ec4872';
+                ctx.fillText(n2._sc[cj2], x, p.py);
+              } else {
+                // Colour bleeds pink → settled over 600 ms, cubic ease —
+                // matching the page's `transition: color 0.42s ease` feel
+                // but held a little longer.
+                var tt = Math.min(1, (elapsed - unlockAt) / 600);
+                var te = tt * tt * (3 - 2 * tt);
+                var pk = [236, 72, 114];
+                var cr2 = Math.round(pk[0] + (settledRgb[0] - pk[0]) * te);
+                var cg2 = Math.round(pk[1] + (settledRgb[1] - pk[1]) * te);
+                var cb2 = Math.round(pk[2] + (settledRgb[2] - pk[2]) * te);
+                ctx.fillStyle = 'rgb(' + cr2 + ',' + cg2 + ',' + cb2 + ')';
+                ctx.fillText(ch2, x, p.py);
+              }
+            }
+            x += widths[cj2];
+          }
+          ctx.restore();
+        }
+      }
+    }
+
+    // Cursor: pointer over a node, otherwise grab/grabbing.
+    if (!dragging) canvas.style.cursor = hoveredIdx >= 0 ? 'pointer' : 'grab';
+
+    requestAnimationFrame(frame);
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    requestAnimationFrame(function (ts) { frame(ts); });
+  } else {
+    requestAnimationFrame(frame);
   }
 })();
     </script>
