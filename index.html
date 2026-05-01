@@ -2153,47 +2153,96 @@
 
     // ── Engine ───────────────────────────────────────────────────────────────
 
-    function engineMove() {
-      busy = true; setThink(true); updateLabels();
-      var fen = encodeURIComponent(game.fen());
-      fetch('https://stockfish.online/api/s/v2.php?fen=' + fen + '&depth=12')
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          busy = false; setThink(false);
-          if (d.success && d.bestmove) {
+    // ── Engine fetch chain ───────────────────────────────────────────────────
+
+    function timed(promise, ms) {
+      return Promise.race([promise,
+        new Promise(function(_, rej) { setTimeout(function(){ rej(new Error('timeout')); }, ms); })]);
+    }
+
+    function tryStockfishOnline(fen) {
+      return timed(
+        fetch('https://stockfish.online/api/s/v2.php?fen=' + encodeURIComponent(fen) + '&depth=12')
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (!d.success || !d.bestmove) throw new Error('no move');
             var raw = d.bestmove.trim().split(' ');
             var mv  = raw[0] === 'bestmove' ? raw[1] : raw[0];
-            if (mv && mv.length >= 4) {
-              var m = game.move({ from: mv.slice(0,2), to: mv.slice(2,4), promotion: mv[4]||'q' });
-              if (m && m.captured) capturedByEngine.push(m.captured);
-            }
-          }
-          renderCaptures(); updateLabels();
-          if (game.game_over()) { render(); showEnd(); return; }
+            if (!mv || mv === '(none)' || mv.length < 4) throw new Error('no move');
+            return mv;
+          }),
+        6000
+      );
+    }
 
-          // Execute queued premove
-          if (premovedFrom && premovedTo) {
-            var pf = premovedFrom, pt = premovedTo;
-            premovedFrom = null; premovedTo = null;
-            var pmv = game.move({ from: pf, to: pt, promotion: 'q' });
-            if (pmv) {
-              if (pmv.captured) capturedByPlayer.push(pmv.captured);
-              renderCaptures(); render(); updateLabels();
-              if (game.game_over()) { showEnd(); return; }
-              if (game.in_check()) setStatus('check!');
-              engineMove();
-              return;
-            }
-            // premove was illegal – silently discard and hand control back
-          }
-          render();
-          setStatus(game.in_check() ? 'check! your turn.' : 'your turn.');
+    function tryChessApi(fen) {
+      return timed(
+        fetch('https://chess-api.com/v1', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ fen: fen, depth: 10 })
         })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            var mv = d.move || (d.from && d.to && d.from + d.to + (d.promotion || ''));
+            if (!mv || mv.length < 4) throw new Error('no move');
+            return mv;
+          }),
+        6000
+      );
+    }
+
+    // Simple greedy fallback: capture highest-value piece, otherwise random
+    function localMove() {
+      var moves = game.moves({ verbose: true });
+      if (!moves.length) return null;
+      moves.sort(function(a, b) { return (MATERIAL[b.captured]||0) - (MATERIAL[a.captured]||0); });
+      var best = MATERIAL[moves[0].captured] || 0;
+      var tier = moves.filter(function(m){ return (MATERIAL[m.captured]||0) === best; });
+      return tier[Math.floor(Math.random() * tier.length)];
+    }
+
+    function getBestMove(fen) {
+      return tryStockfishOnline(fen)
+        .catch(function() { return tryChessApi(fen); })
         .catch(function() {
-          busy = false; setThink(false);
-          premovedFrom = null; premovedTo = null;
-          setStatus('engine offline. your turn.'); render(); updateLabels();
+          var m = localMove();
+          return m ? m.from + m.to + (m.promotion || '') : null;
         });
+    }
+
+    function afterEngineMove() {
+      renderCaptures(); updateLabels();
+      if (game.game_over()) { render(); showEnd(); return; }
+      // Execute queued premove
+      if (premovedFrom && premovedTo) {
+        var pf = premovedFrom, pt = premovedTo;
+        premovedFrom = null; premovedTo = null;
+        var pmv = game.move({ from: pf, to: pt, promotion: 'q' });
+        if (pmv) {
+          if (pmv.captured) capturedByPlayer.push(pmv.captured);
+          renderCaptures(); render(); updateLabels();
+          if (game.game_over()) { showEnd(); return; }
+          if (game.in_check()) setStatus('check!');
+          engineMove();
+          return;
+        }
+      }
+      render();
+      setStatus(game.in_check() ? 'check! your turn.' : 'your turn.');
+    }
+
+    function engineMove() {
+      busy = true; setThink(true); updateLabels();
+      var fen = game.fen();
+      getBestMove(fen).then(function(mv) {
+        busy = false; setThink(false);
+        if (mv && mv.length >= 4) {
+          var m = game.move({ from: mv.slice(0,2), to: mv.slice(2,4), promotion: mv[4]||'q' });
+          if (m && m.captured) capturedByEngine.push(m.captured);
+        }
+        afterEngineMove();
+      });
     }
 
     // ── Captures & material ──────────────────────────────────────────────────
