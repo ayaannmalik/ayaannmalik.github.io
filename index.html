@@ -723,6 +723,7 @@
         .chess-sq-dark  { background: #b58863; }
         .chess-sq-selected { outline: 3px inset rgba(236,72,114,0.75); outline-offset: -3px; }
         .chess-sq-check    { background: rgba(220,50,50,0.55) !important; }
+        .chess-sq-premove  { background: rgba(140,90,210,0.42) !important; }
         .chess-sq-target::after {
           content: '';
           position: absolute;
@@ -974,10 +975,7 @@
                 </div>
             </section>
             <section class="section" id="chess">
-                <h2>bored?</h2>
-                <div class="chess-meta">
-                    play against my rating in chess :)</span>
-                </div>
+                <h2>play against my rating in chess :)</span></h2>
                 <div class="chess-layout">
                     <div class="chess-col">
                         <div class="chess-player-row">
@@ -1916,6 +1914,10 @@
     var playerColor = Math.random() < 0.5 ? 'w' : 'b';
     var engineColor, game, selected, flipped, busy;
     var capturedByPlayer, capturedByEngine;
+    // drag state: { sq, startX, startY, ghost, active, cellSize }
+    var dragState    = null;
+    var premovedFrom = null;
+    var premovedTo   = null;
 
     var boardEl   = document.getElementById('chess-board-inner');
     var statusEl  = document.getElementById('chess-status');
@@ -1938,6 +1940,9 @@
       busy             = false;
       capturedByPlayer = [];
       capturedByEngine = [];
+      dragState        = null;
+      premovedFrom     = null;
+      premovedTo       = null;
       if (overlayEl) overlayEl.style.display = 'none';
       setThink(false);
       if (metaEl) metaEl.textContent = 'you are ' + (playerColor === 'w' ? 'white' : 'black');
@@ -1954,10 +1959,12 @@
     }
 
     function updateLabels() {
-      var myTurn = game.turn() === playerColor;
-      if (nameTop) nameTop.classList.toggle('active', !myTurn);
-      if (nameBot) nameBot.classList.toggle('active',  myTurn);
+      var t = game.turn();
+      if (nameTop) nameTop.classList.toggle('active', t === engineColor);
+      if (nameBot) nameBot.classList.toggle('active', t === playerColor);
     }
+
+    // ── Render ──────────────────────────────────────────────────────────────
 
     function render() {
       if (!boardEl) return;
@@ -1966,8 +1973,9 @@
       var ranks = flipped ? [0,1,2,3,4,5,6,7] : [7,6,5,4,3,2,1,0];
       var files = flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
       var tgts  = {};
-      if (selected) game.moves({ square: selected, verbose: true })
-                        .forEach(function(m) { tgts[m.to] = true; });
+      if (selected && !busy)
+        game.moves({ square: selected, verbose: true }).forEach(function(m) { tgts[m.to] = true; });
+
       for (var ri = 0; ri < 8; ri++) {
         for (var fi = 0; fi < 8; fi++) {
           var rank  = ranks[ri], file = files[fi];
@@ -1975,22 +1983,142 @@
           var piece = pos[7 - rank][file];
           var cell  = document.createElement('div');
           cell.className = 'chess-sq chess-sq-' + ((rank + file) % 2 !== 0 ? 'light' : 'dark');
-          if (selected === sq)    cell.classList.add('chess-sq-selected');
-          if (tgts[sq])           cell.classList.add('chess-sq-target');
-          if (tgts[sq] && piece)  cell.classList.add('chess-sq-occupied');
-          if (game.in_check() && piece && piece.type === 'k' && piece.color === game.turn())
-            cell.classList.add('chess-sq-check');
+          cell.dataset.sq = sq;
+
+          if (selected === sq && !busy)                                         cell.classList.add('chess-sq-selected');
+          if (tgts[sq])                                                         cell.classList.add('chess-sq-target');
+          if (tgts[sq] && piece)                                                cell.classList.add('chess-sq-occupied');
+          if (sq === premovedFrom || sq === premovedTo)                         cell.classList.add('chess-sq-premove');
+          if (game.in_check() && piece && piece.type==='k' && piece.color===game.turn())
+                                                                                cell.classList.add('chess-sq-check');
           if (piece) {
             var img = document.createElement('img');
             img.src = PIECE_SRC + piece.color + piece.type.toUpperCase() + '.svg';
             img.className = 'chess-piece'; img.draggable = false;
+            if (dragState && dragState.active && dragState.sq === sq) img.style.opacity = '0.28';
             cell.appendChild(img);
           }
-          cell.addEventListener('click', onClick.bind(null, sq));
+          cell.addEventListener('mousedown',  onCellDown.bind(null, sq));
+          cell.addEventListener('touchstart', onCellDown.bind(null, sq), { passive: false });
           boardEl.appendChild(cell);
         }
       }
     }
+
+    // ── Drag ────────────────────────────────────────────────────────────────
+
+    function onCellDown(sq, e) {
+      if (game.game_over()) return;
+      var pos   = game.board();
+      var piece = pos[7 - (parseInt(sq[1]) - 1)][FILES.indexOf(sq[0])];
+
+      // If not own piece, route straight to click handler
+      if (!piece || piece.color !== playerColor) {
+        if (!busy) onClick(sq);
+        return;
+      }
+      var cx = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX) || 0;
+      var cy = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY) || 0;
+      dragState = { sq: sq, startX: cx, startY: cy, ghost: null, active: false,
+                    cellSize: boardEl.offsetWidth / 8 };
+      if (!busy) { selected = sq; }
+      else       { premovedFrom = sq; premovedTo = null; }
+      render();
+      e.preventDefault();
+    }
+
+    function moveDrag(cx, cy) {
+      if (!dragState) return;
+      if (!dragState.active) {
+        if (Math.abs(cx - dragState.startX) > 4 || Math.abs(cy - dragState.startY) > 4) {
+          dragState.active = true;
+          var pos   = game.board();
+          var piece = pos[7 - (parseInt(dragState.sq[1]) - 1)][FILES.indexOf(dragState.sq[0])];
+          if (piece) {
+            var g  = document.createElement('img');
+            var cs = dragState.cellSize;
+            g.src  = PIECE_SRC + piece.color + piece.type.toUpperCase() + '.svg';
+            g.style.cssText = 'position:fixed;width:'+cs+'px;height:'+cs+'px;'
+              + 'pointer-events:none;z-index:9999;'
+              + 'left:'+(cx-cs/2)+'px;top:'+(cy-cs/2)+'px;';
+            document.body.appendChild(g);
+            dragState.ghost = g;
+            render();
+          }
+        }
+      }
+      if (dragState.ghost) {
+        var cs2 = dragState.cellSize;
+        dragState.ghost.style.left = (cx - cs2/2) + 'px';
+        dragState.ghost.style.top  = (cy - cs2/2) + 'px';
+      }
+    }
+
+    function finishDrag(cx, cy) {
+      var fromSq  = dragState.sq;
+      var wasDrag = dragState.active;
+      if (dragState.ghost) dragState.ghost.remove();
+      dragState = null;
+
+      if (!wasDrag) {
+        // Treat as plain click
+        if (!busy) onClick(fromSq);
+        else       onPreClick(fromSq);
+        return;
+      }
+
+      var toSq = getSquareAt(cx, cy);
+      if (!toSq || toSq === fromSq) {
+        if (!busy) selected = fromSq;
+        render();
+        return;
+      }
+
+      if (busy) {
+        premovedFrom = fromSq; premovedTo = toSq;
+        render();
+        return;
+      }
+
+      selected = null;
+      var mv = game.move({ from: fromSq, to: toSq, promotion: 'q' });
+      if (mv) {
+        if (mv.captured) capturedByPlayer.push(mv.captured);
+        renderCaptures(); render(); updateLabels();
+        if (game.game_over()) { showEnd(); return; }
+        if (game.in_check()) setStatus('check!');
+        engineMove();
+      } else { render(); }
+    }
+
+    function getSquareAt(cx, cy) {
+      var el = document.elementFromPoint(cx, cy);
+      while (el && el !== boardEl) {
+        if (el.dataset && el.dataset.sq) return el.dataset.sq;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    document.addEventListener('mousemove', function(e) { moveDrag(e.clientX, e.clientY); });
+    document.addEventListener('touchmove', function(e) {
+      if (!dragState) return;
+      e.preventDefault();
+      moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: false });
+    document.addEventListener('mouseup',  function(e) { if (dragState) finishDrag(e.clientX, e.clientY); });
+    document.addEventListener('touchend', function(e) {
+      if (dragState) finishDrag(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    });
+
+    // Right-click cancels premove
+    if (boardEl) boardEl.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      premovedFrom = null; premovedTo = null; selected = null;
+      render();
+    });
+
+    // ── Click (non-drag path) ────────────────────────────────────────────────
 
     function onClick(sq) {
       if (busy || game.game_over() || game.turn() !== playerColor) return;
@@ -2015,8 +2143,18 @@
       }
     }
 
+    function onPreClick(sq) {
+      // premovedFrom was already set by onCellDown; now set the target
+      if (!premovedFrom) return;
+      if (sq === premovedFrom) { premovedFrom = null; premovedTo = null; }
+      else                     { premovedTo = sq; }
+      render();
+    }
+
+    // ── Engine ───────────────────────────────────────────────────────────────
+
     function engineMove() {
-      busy = true; setThink(true);
+      busy = true; setThink(true); updateLabels();
       var fen = encodeURIComponent(game.fen());
       fetch('https://stockfish.online/api/s/v2.php?fen=' + fen + '&depth=12')
         .then(function(r) { return r.json(); })
@@ -2030,18 +2168,38 @@
               if (m && m.captured) capturedByEngine.push(m.captured);
             }
           }
-          renderCaptures(); render(); updateLabels();
-          if (game.game_over()) { showEnd(); return; }
+          renderCaptures(); updateLabels();
+          if (game.game_over()) { render(); showEnd(); return; }
+
+          // Execute queued premove
+          if (premovedFrom && premovedTo) {
+            var pf = premovedFrom, pt = premovedTo;
+            premovedFrom = null; premovedTo = null;
+            var pmv = game.move({ from: pf, to: pt, promotion: 'q' });
+            if (pmv) {
+              if (pmv.captured) capturedByPlayer.push(pmv.captured);
+              renderCaptures(); render(); updateLabels();
+              if (game.game_over()) { showEnd(); return; }
+              if (game.in_check()) setStatus('check!');
+              engineMove();
+              return;
+            }
+            // premove was illegal – silently discard and hand control back
+          }
+          render();
           setStatus(game.in_check() ? 'check! your turn.' : 'your turn.');
         })
         .catch(function() {
           busy = false; setThink(false);
-          setStatus('engine offline. your turn.'); render();
+          premovedFrom = null; premovedTo = null;
+          setStatus('engine offline. your turn.'); render(); updateLabels();
         });
     }
 
+    // ── Captures & material ──────────────────────────────────────────────────
+
     function renderCaptures() {
-      var ec = engineColor || (playerColor === 'w' ? 'b' : 'w');
+      var ec   = engineColor || (playerColor === 'w' ? 'b' : 'w');
       var sort = function(a) { return a.slice().sort(function(x,y){ return CAP_ORDER[x]-CAP_ORDER[y]; }); };
       renderCapRow('chess-caps-top',    sort(capturedByEngine), playerColor);
       renderCapRow('chess-caps-bottom', sort(capturedByPlayer), ec);
@@ -2064,6 +2222,8 @@
         el.appendChild(i);
       });
     }
+
+    // ── End game ─────────────────────────────────────────────────────────────
 
     function showEnd() {
       if (!overlayEl) return;
