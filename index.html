@@ -647,29 +647,69 @@
           margin-bottom: 20px;
           letter-spacing: 0.02em;
         }
-        .chess-elo {
-          font-weight: 600;
-          color: #ec4872;
-        }
-        .chess-wrap {
+        .chess-elo { font-weight: 600; color: #ec4872; }
+
+        .chess-layout {
           display: flex;
-          gap: 32px;
+          gap: 28px;
           align-items: flex-start;
           flex-wrap: wrap;
         }
+        .chess-col {
+          display: flex;
+          flex-direction: column;
+          gap: 7px;
+          flex-shrink: 0;
+        }
+        .chess-player-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-height: 22px;
+        }
+        .chess-player-name {
+          font-size: 12px;
+          font-weight: 500;
+          color: #999;
+          min-width: 46px;
+          letter-spacing: 0.03em;
+          transition: color 0.18s;
+        }
+        .chess-player-name.active { color: #1a1a1a; font-weight: 600; }
+        .chess-caps {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 1px;
+          align-items: center;
+          flex: 1;
+        }
+        .chess-cap-img {
+          width: 15px;
+          height: 15px;
+          display: block;
+          opacity: 0.8;
+        }
+        .chess-adv {
+          font-size: 11px;
+          color: #888;
+          font-weight: 600;
+          min-width: 18px;
+        }
+
         .chess-board-outer {
           flex-shrink: 0;
-          border-radius: 4px;
+          border-radius: 5px;
           overflow: hidden;
-          box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+          box-shadow: 0 4px 28px rgba(0,0,0,0.16);
           user-select: none;
-          line-height: 0;
+          position: relative;
         }
         .chess-board {
           display: grid;
           grid-template-columns: repeat(8, 1fr);
           width: clamp(240px, 44vw, 384px);
           aspect-ratio: 1;
+          display: grid;
         }
         .chess-sq {
           display: flex;
@@ -681,15 +721,14 @@
         }
         .chess-sq-light { background: #f0d9b5; }
         .chess-sq-dark  { background: #b58863; }
-        .chess-sq-selected { outline: 3px inset rgba(236,72,114,0.7); outline-offset: -3px; }
-        .chess-sq-check    { background: rgba(236,72,114,0.55) !important; }
+        .chess-sq-selected { outline: 3px inset rgba(236,72,114,0.75); outline-offset: -3px; }
+        .chess-sq-check    { background: rgba(220,50,50,0.55) !important; }
         .chess-sq-target::after {
           content: '';
           position: absolute;
-          width: 32%;
-          height: 32%;
+          width: 32%; height: 32%;
           border-radius: 50%;
-          background: rgba(0,0,0,0.18);
+          background: rgba(0,0,0,0.19);
           pointer-events: none;
         }
         .chess-sq-target.chess-sq-occupied::after {
@@ -699,40 +738,85 @@
           border: 4px solid rgba(0,0,0,0.22);
         }
         .chess-piece {
-          width: 84%;
-          height: 84%;
+          width: 84%; height: 84%;
           display: block;
           pointer-events: none;
           position: relative;
           z-index: 1;
         }
 
+        /* Endgame overlay */
+        .chess-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(0,0,0,0.48);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 20;
+          backdrop-filter: blur(1px);
+        }
+        .chess-overlay-card {
+          background: #fff;
+          border-radius: 10px;
+          padding: 22px 26px 20px;
+          text-align: center;
+          box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+          min-width: 160px;
+        }
+        .chess-overlay-title {
+          font-size: 17px;
+          font-weight: 600;
+          color: #111;
+          margin-bottom: 5px;
+        }
+        .chess-overlay-sub {
+          font-size: 12px;
+          color: #aaa;
+          margin-bottom: 18px;
+          font-style: italic;
+        }
+        .chess-overlay-btn {
+          background: #ec4872;
+          color: #fff;
+          border: none;
+          border-radius: 6px;
+          padding: 8px 22px;
+          font-size: 12.5px;
+          font-family: inherit;
+          cursor: pointer;
+          letter-spacing: 0.04em;
+          transition: opacity 0.18s;
+        }
+        .chess-overlay-btn:hover { opacity: 0.78; }
+
+        /* Sidebar */
         .chess-sidebar {
           display: flex;
           flex-direction: column;
-          gap: 18px;
-          padding-top: 2px;
+          gap: 16px;
+          padding-top: 36px;
         }
-        .chess-status {
-          font-size: 13.5px;
+        .chess-turn {
+          font-size: 13px;
           color: #333;
           font-style: italic;
-          min-height: 20px;
+          min-height: 18px;
         }
         .chess-thinking {
-          font-size: 11px;
+          font-size: 10.5px;
           color: #b58863;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
         }
-        .chess-btn-group {
+        .chess-actions {
           display: flex;
           flex-direction: column;
           gap: 7px;
         }
         .chess-btn {
           background: none;
-          border: 1px solid #e0e0e0;
+          border: 1px solid #e8e8e8;
           border-radius: 6px;
           padding: 7px 16px;
           font-size: 12px;
@@ -892,18 +976,37 @@
             <section class="section" id="chess">
                 <h2>bored?</h2>
                 <div class="chess-meta">
-                    playing against <span class="chess-elo">~1800 ELO</span> stockfish &middot; <span id="chess-color-meta">you are white</span>
+                    play against my rating in chess :)</span>
                 </div>
-                <div class="chess-wrap">
-                    <div class="chess-board-outer">
-                        <div id="chess-board-inner" class="chess-board"></div>
+                <div class="chess-layout">
+                    <div class="chess-col">
+                        <div class="chess-player-row">
+                            <span class="chess-player-name" id="chess-name-top">engine</span>
+                            <div class="chess-caps" id="chess-caps-top"></div>
+                            <span class="chess-adv" id="chess-adv-top"></span>
+                        </div>
+                        <div class="chess-board-outer">
+                            <div id="chess-board-inner" class="chess-board"></div>
+                            <div id="chess-overlay" class="chess-overlay" style="display:none">
+                                <div class="chess-overlay-card">
+                                    <div class="chess-overlay-title" id="chess-ov-title"></div>
+                                    <div class="chess-overlay-sub" id="chess-ov-sub"></div>
+                                    <button class="chess-overlay-btn" id="chess-again">play again</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chess-player-row">
+                            <span class="chess-player-name" id="chess-name-bottom">you</span>
+                            <div class="chess-caps" id="chess-caps-bottom"></div>
+                            <span class="chess-adv" id="chess-adv-bottom"></span>
+                        </div>
                     </div>
                     <div class="chess-sidebar">
-                        <div id="chess-status" class="chess-status">your turn.</div>
-                        <div id="chess-thinking" class="chess-thinking" style="display:none">thinking...</div>
-                        <div class="chess-btn-group">
-                            <button id="chess-new" class="chess-btn">new game</button>
-                            <button id="chess-flip" class="chess-btn">flip board</button>
+                        <div class="chess-turn" id="chess-status">your turn.</div>
+                        <div class="chess-thinking" id="chess-thinking" style="display:none">thinking...</div>
+                        <div class="chess-actions">
+                            <button class="chess-btn" id="chess-new">new game</button>
+                            <button class="chess-btn" id="chess-flip">flip board</button>
                         </div>
                     </div>
                 </div>
@@ -1797,78 +1900,92 @@
 })();
     </script>
     <script>
-// ── Chess vs ~1800 ELO Stockfish (via stockfish.online API) ──────────────────
+// ── Chess vs ~1800 ELO Stockfish ─────────────────────────────────────────────
 (function () {
-  // Dynamically load chess.js then boot the game.
   var s = document.createElement('script');
   s.src = 'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js';
   s.onload = boot;
   document.head.appendChild(s);
 
-  // SVG piece set from Lichess (cburnett, open-source)
   var PIECE_SRC = 'https://lichess1.org/assets/piece/cburnett/';
-  var FILES = 'abcdefgh';
+  var FILES     = 'abcdefgh';
+  var MATERIAL  = { p:1, n:3, b:3, r:5, q:9, k:0 };
+  var CAP_ORDER = { q:0, r:1, b:2, n:3, p:4 };
 
   function boot() {
     var playerColor = Math.random() < 0.5 ? 'w' : 'b';
-    var game     = new Chess();
-    var selected = null;
-    var flipped  = playerColor === 'b';   // flip so player's pieces are always at bottom
-    var busy     = false;
+    var engineColor, game, selected, flipped, busy;
+    var capturedByPlayer, capturedByEngine;
 
     var boardEl   = document.getElementById('chess-board-inner');
     var statusEl  = document.getElementById('chess-status');
     var thinkEl   = document.getElementById('chess-thinking');
+    var overlayEl = document.getElementById('chess-overlay');
+    var ovTitle   = document.getElementById('chess-ov-title');
+    var ovSub     = document.getElementById('chess-ov-sub');
     var metaEl    = document.getElementById('chess-color-meta');
+    var nameTop   = document.getElementById('chess-name-top');
+    var nameBot   = document.getElementById('chess-name-bottom');
 
-    function setStatus(txt) { if (statusEl) statusEl.textContent = txt; }
-    function setThink(on)   { if (thinkEl)  thinkEl.style.display = on ? '' : 'none'; }
-    function setMeta() {
+    function setStatus(t) { if (statusEl) statusEl.textContent = t; }
+    function setThink(on) { if (thinkEl)  thinkEl.style.display = on ? '' : 'none'; }
+
+    function initGame() {
+      engineColor      = playerColor === 'w' ? 'b' : 'w';
+      game             = new Chess();
+      selected         = null;
+      flipped          = playerColor === 'b';
+      busy             = false;
+      capturedByPlayer = [];
+      capturedByEngine = [];
+      if (overlayEl) overlayEl.style.display = 'none';
+      setThink(false);
       if (metaEl) metaEl.textContent = 'you are ' + (playerColor === 'w' ? 'white' : 'black');
+      renderCaptures();
+      updateLabels();
+      if (playerColor === 'b') {
+        setStatus('engine thinking...');
+        render();
+        engineMove();
+      } else {
+        setStatus('your turn.');
+        render();
+      }
+    }
+
+    function updateLabels() {
+      var myTurn = game.turn() === playerColor;
+      if (nameTop) nameTop.classList.toggle('active', !myTurn);
+      if (nameBot) nameBot.classList.toggle('active',  myTurn);
     }
 
     function render() {
       if (!boardEl) return;
       boardEl.innerHTML = '';
-      var pos    = game.board();  // pos[0] = rank 8, pos[7] = rank 1
-      var ranks  = flipped ? [0,1,2,3,4,5,6,7] : [7,6,5,4,3,2,1,0];
-      var files  = flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
-
-      // Legal targets for selected piece
-      var targets = {};
-      if (selected) {
-        var mvs = game.moves({ square: selected, verbose: true });
-        mvs.forEach(function(m) { targets[m.to] = true; });
-      }
-
+      var pos   = game.board();
+      var ranks = flipped ? [0,1,2,3,4,5,6,7] : [7,6,5,4,3,2,1,0];
+      var files = flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+      var tgts  = {};
+      if (selected) game.moves({ square: selected, verbose: true })
+                        .forEach(function(m) { tgts[m.to] = true; });
       for (var ri = 0; ri < 8; ri++) {
         for (var fi = 0; fi < 8; fi++) {
-          var rank  = ranks[ri];
-          var file  = files[fi];
+          var rank  = ranks[ri], file = files[fi];
           var sq    = FILES[file] + (rank + 1);
           var piece = pos[7 - rank][file];
-
-          var cell = document.createElement('div');
-          var light = (rank + file) % 2 !== 0;
-          cell.className = 'chess-sq chess-sq-' + (light ? 'light' : 'dark');
-          cell.dataset.sq = sq;
-
-          if (selected === sq)             cell.classList.add('chess-sq-selected');
-          if (targets[sq])                 cell.classList.add('chess-sq-target');
-          if (targets[sq] && piece)        cell.classList.add('chess-sq-occupied');
-
-          // King in check
+          var cell  = document.createElement('div');
+          cell.className = 'chess-sq chess-sq-' + ((rank + file) % 2 !== 0 ? 'light' : 'dark');
+          if (selected === sq)    cell.classList.add('chess-sq-selected');
+          if (tgts[sq])           cell.classList.add('chess-sq-target');
+          if (tgts[sq] && piece)  cell.classList.add('chess-sq-occupied');
           if (game.in_check() && piece && piece.type === 'k' && piece.color === game.turn())
             cell.classList.add('chess-sq-check');
-
           if (piece) {
             var img = document.createElement('img');
             img.src = PIECE_SRC + piece.color + piece.type.toUpperCase() + '.svg';
-            img.className = 'chess-piece';
-            img.draggable = false;
+            img.className = 'chess-piece'; img.draggable = false;
             cell.appendChild(img);
           }
-
           cell.addEventListener('click', onClick.bind(null, sq));
           boardEl.appendChild(cell);
         }
@@ -1878,16 +1995,15 @@
     function onClick(sq) {
       if (busy || game.game_over() || game.turn() !== playerColor) return;
       var pos   = game.board();
-      var file  = FILES.indexOf(sq[0]);
-      var rank  = parseInt(sq[1]) - 1;
-      var piece = pos[7 - rank][file];
-
+      var piece = pos[7 - (parseInt(sq[1]) - 1)][FILES.indexOf(sq[0])];
       if (selected) {
-        var move = game.move({ from: selected, to: sq, promotion: 'q' });
+        var mv = game.move({ from: selected, to: sq, promotion: 'q' });
         selected = null;
-        if (move) {
-          render();
-          if (game.game_over()) { endStatus(); return; }
+        if (mv) {
+          if (mv.captured) capturedByPlayer.push(mv.captured);
+          renderCaptures(); render(); updateLabels();
+          if (game.game_over()) { showEnd(); return; }
+          if (game.in_check()) setStatus('check!');
           engineMove();
         } else {
           if (piece && piece.color === playerColor) selected = sq;
@@ -1900,77 +2016,79 @@
     }
 
     function engineMove() {
-      busy = true;
-      setStatus('engine thinking...');
-      setThink(true);
+      busy = true; setThink(true);
       var fen = encodeURIComponent(game.fen());
-      // depth 12 ≈ 1800 ELO play strength
       fetch('https://stockfish.online/api/s/v2.php?fen=' + fen + '&depth=12')
         .then(function(r) { return r.json(); })
         .then(function(d) {
-          busy = false;
-          setThink(false);
+          busy = false; setThink(false);
           if (d.success && d.bestmove) {
-            // bestmove field: "e2e4" or "bestmove e2e4 ponder ..."
-            var raw  = d.bestmove.trim().split(' ');
-            var mv   = raw[0] === 'bestmove' ? raw[1] : raw[0];
+            var raw = d.bestmove.trim().split(' ');
+            var mv  = raw[0] === 'bestmove' ? raw[1] : raw[0];
             if (mv && mv.length >= 4) {
-              game.move({ from: mv.slice(0,2), to: mv.slice(2,4), promotion: mv[4] || 'q' });
+              var m = game.move({ from: mv.slice(0,2), to: mv.slice(2,4), promotion: mv[4]||'q' });
+              if (m && m.captured) capturedByEngine.push(m.captured);
             }
           }
-          render();
-          if (game.game_over()) { endStatus(); return; }
-          setStatus('your turn.');
+          renderCaptures(); render(); updateLabels();
+          if (game.game_over()) { showEnd(); return; }
+          setStatus(game.in_check() ? 'check! your turn.' : 'your turn.');
         })
         .catch(function() {
-          busy = false;
-          setThink(false);
-          setStatus('engine unavailable. your turn.');
-          render();
+          busy = false; setThink(false);
+          setStatus('engine offline. your turn.'); render();
         });
     }
 
-    function endStatus() {
-      if (game.in_checkmate())
-        setStatus(game.turn() === 'w' ? 'checkmate. you lost.' : 'checkmate. you won!');
-      else if (game.in_draw())
-        setStatus('draw.');
-      else
-        setStatus('game over.');
+    function renderCaptures() {
+      var ec = engineColor || (playerColor === 'w' ? 'b' : 'w');
+      var sort = function(a) { return a.slice().sort(function(x,y){ return CAP_ORDER[x]-CAP_ORDER[y]; }); };
+      renderCapRow('chess-caps-top',    sort(capturedByEngine), playerColor);
+      renderCapRow('chess-caps-bottom', sort(capturedByPlayer), ec);
+      var pm = capturedByPlayer.reduce(function(s,p){ return s+MATERIAL[p]; }, 0);
+      var em = capturedByEngine.reduce(function(s,p){ return s+MATERIAL[p]; }, 0);
+      var d  = pm - em;
+      var aT = document.getElementById('chess-adv-top');
+      var aB = document.getElementById('chess-adv-bottom');
+      if (aT) aT.textContent = d < 0 ? '+' + (-d) : '';
+      if (aB) aB.textContent = d > 0 ? '+' + d    : '';
     }
 
+    function renderCapRow(id, pieces, color) {
+      var el = document.getElementById(id); if (!el) return;
+      el.innerHTML = '';
+      pieces.forEach(function(t) {
+        var i = document.createElement('img');
+        i.src = PIECE_SRC + color + t.toUpperCase() + '.svg';
+        i.className = 'chess-cap-img'; i.draggable = false;
+        el.appendChild(i);
+      });
+    }
+
+    function showEnd() {
+      if (!overlayEl) return;
+      var t, s;
+      if      (game.in_checkmate())            { t = game.turn()===playerColor ? 'you lost.' : 'you won!'; s = 'checkmate'; }
+      else if (game.in_stalemate())            { t = 'draw.'; s = 'stalemate'; }
+      else if (game.in_threefold_repetition()) { t = 'draw.'; s = 'threefold repetition'; }
+      else if (game.insufficient_material())   { t = 'draw.'; s = 'insufficient material'; }
+      else                                     { t = 'draw.'; s = '50-move rule'; }
+      if (ovTitle) ovTitle.textContent = t;
+      if (ovSub)   ovSub.textContent   = s;
+      overlayEl.style.display = 'flex';
+    }
+
+    document.getElementById('chess-again').addEventListener('click', function() {
+      playerColor = Math.random() < 0.5 ? 'w' : 'b'; initGame();
+    });
     document.getElementById('chess-new').addEventListener('click', function() {
-      playerColor = Math.random() < 0.5 ? 'w' : 'b';
-      game        = new Chess();
-      selected    = null;
-      busy        = false;
-      flipped     = playerColor === 'b';
-      setThink(false);
-      setMeta();
-      if (playerColor === 'b') {
-        setStatus('engine moves first...');
-        render();
-        engineMove();
-      } else {
-        setStatus('your turn.');
-        render();
-      }
+      playerColor = Math.random() < 0.5 ? 'w' : 'b'; initGame();
     });
-
     document.getElementById('chess-flip').addEventListener('click', function() {
-      flipped = !flipped;
-      render();
+      flipped = !flipped; render();
     });
 
-    setMeta();
-    if (playerColor === 'b') {
-      setStatus('engine moves first...');
-      render();
-      engineMove();
-    } else {
-      setStatus('your turn.');
-      render();
-    }
+    initGame();
   }
 })();
     </script>
