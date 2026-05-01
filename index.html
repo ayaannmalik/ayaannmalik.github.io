@@ -892,7 +892,7 @@
             <section class="section" id="chess">
                 <h2>bored?</h2>
                 <div class="chess-meta">
-                    playing against <span class="chess-elo">~1800 ELO</span> stockfish engine &middot; you play white
+                    playing against <span class="chess-elo">~1800 ELO</span> stockfish &middot; <span id="chess-color-meta">you are white</span>
                 </div>
                 <div class="chess-wrap">
                     <div class="chess-board-outer">
@@ -1810,17 +1810,22 @@
   var FILES = 'abcdefgh';
 
   function boot() {
+    var playerColor = Math.random() < 0.5 ? 'w' : 'b';
     var game     = new Chess();
     var selected = null;
-    var flipped  = false;
+    var flipped  = playerColor === 'b';   // flip so player's pieces are always at bottom
     var busy     = false;
 
     var boardEl   = document.getElementById('chess-board-inner');
     var statusEl  = document.getElementById('chess-status');
     var thinkEl   = document.getElementById('chess-thinking');
+    var metaEl    = document.getElementById('chess-color-meta');
 
     function setStatus(txt) { if (statusEl) statusEl.textContent = txt; }
     function setThink(on)   { if (thinkEl)  thinkEl.style.display = on ? '' : 'none'; }
+    function setMeta() {
+      if (metaEl) metaEl.textContent = 'you are ' + (playerColor === 'w' ? 'white' : 'black');
+    }
 
     function render() {
       if (!boardEl) return;
@@ -1871,7 +1876,7 @@
     }
 
     function onClick(sq) {
-      if (busy || game.game_over() || game.turn() !== 'w') return;
+      if (busy || game.game_over() || game.turn() !== playerColor) return;
       var pos   = game.board();
       var file  = FILES.indexOf(sq[0]);
       var rank  = parseInt(sq[1]) - 1;
@@ -1885,12 +1890,11 @@
           if (game.game_over()) { endStatus(); return; }
           engineMove();
         } else {
-          // Reselect if own piece clicked
-          if (piece && piece.color === 'w') selected = sq;
+          if (piece && piece.color === playerColor) selected = sq;
           render();
         }
       } else {
-        if (piece && piece.color === 'w') selected = sq;
+        if (piece && piece.color === playerColor) selected = sq;
         render();
       }
     }
@@ -1936,12 +1940,21 @@
     }
 
     document.getElementById('chess-new').addEventListener('click', function() {
-      game     = new Chess();
-      selected = null;
-      busy     = false;
+      playerColor = Math.random() < 0.5 ? 'w' : 'b';
+      game        = new Chess();
+      selected    = null;
+      busy        = false;
+      flipped     = playerColor === 'b';
       setThink(false);
-      setStatus('your turn.');
-      render();
+      setMeta();
+      if (playerColor === 'b') {
+        setStatus('engine moves first...');
+        render();
+        engineMove();
+      } else {
+        setStatus('your turn.');
+        render();
+      }
     });
 
     document.getElementById('chess-flip').addEventListener('click', function() {
@@ -1949,7 +1962,15 @@
       render();
     });
 
-    render();
+    setMeta();
+    if (playerColor === 'b') {
+      setStatus('engine moves first...');
+      render();
+      engineMove();
+    } else {
+      setStatus('your turn.');
+      render();
+    }
   }
 })();
     </script>
