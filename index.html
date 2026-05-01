@@ -2228,6 +2228,8 @@
           return;
         }
       }
+      // Always clear any partial premove state before handing back to player
+      premovedFrom = null; premovedTo = null;
       render();
       setStatus(game.in_check() ? 'check! your turn.' : 'your turn.');
     }
