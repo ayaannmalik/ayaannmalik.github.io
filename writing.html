@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>writing — Ayaan Naveed Malik</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&family=Unica+One&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { background: #fff; }
+
+        body {
+            font-family: "Lucida Grande", "Lucida Sans Unicode", "Helvetica Neue", Helvetica, sans-serif;
+            font-size: 16px;
+            line-height: 1.65;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Background canvas ───────────────────────────────────────────── */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Nav ─────────────────────────────────────────────────────────── */
+        .top-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 10;
+            padding: 16px clamp(24px, 6vw, 72px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.055);
+        }
+
+        .nav-home {
+            font-family: "Unica One", sans-serif;
+            font-size: 13.5px;
+            letter-spacing: 0.10em;
+            color: #000;
+            text-decoration: none;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        .nav-home:hover { opacity: 1; }
+
+        .nav-substack {
+            font-family: "Open Sans", sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #b0b0b0;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-substack:hover { color: #ec4872; }
+
+        /* ── Main ────────────────────────────────────────────────────────── */
+        .writings-main {
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 136px clamp(24px, 6vw, 48px) 100px;
+        }
+
+        /* ── Header ──────────────────────────────────────────────────────── */
+        .writings-header {
+            margin-bottom: 68px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .writings-title {
+            font-family: "Unica One", sans-serif;
+            font-size: clamp(48px, 10vw, 86px);
+            font-weight: 400;
+            letter-spacing: 0.04em;
+            color: #000;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+
+        .writings-desc {
+            font-size: 13.5px;
+            color: #b8b8b8;
+            line-height: 1.6;
+            font-style: italic;
+            max-width: 380px;
+        }
+
+        /* ── Essay cards ─────────────────────────────────────────────────── */
+        .essay {
+            margin-bottom: 62px;
+            padding-bottom: 62px;
+            border-bottom: 1px solid #ebebeb;
+        }
+        .essay:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .essay-meta {
+            font-family: "Open Sans", sans-serif;
+            font-size: 10.5px;
+            font-weight: 500;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #d0d0d0;
+            margin-bottom: 10px;
+        }
+
+        .essay-title {
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 1.35;
+            margin-bottom: 6px;
+            letter-spacing: -0.01em;
+        }
+
+        .essay-title a {
+            color: #080808;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .essay-title a:hover { color: #ec4872; }
+
+        .essay-sub {
+            font-size: 13px;
+            font-style: italic;
+            color: #c0c0c0;
+            margin-bottom: 20px;
+        }
+
+        .essay-excerpt {
+            font-size: 15px;
+            line-height: 1.82;
+            color: #525252;
+            margin-bottom: 24px;
+        }
+        .essay-excerpt em {
+            font-style: italic;
+            color: #3a3a3a;
+        }
+
+        .essay-read {
+            font-family: "Open Sans", sans-serif;
+            font-size: 10.5px;
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #ec4872;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(236, 72, 114, 0.28);
+            padding-bottom: 2px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+        .essay-read:hover {
+            color: #c73558;
+            border-color: rgba(199, 53, 88, 0.55);
+        }
+
+        /* ── Footer ──────────────────────────────────────────────────────── */
+        .writings-footer {
+            position: relative;
+            z-index: 1;
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 0 clamp(24px, 6vw, 48px) 56px;
+            font-family: "Open Sans", sans-serif;
+            font-size: 11px;
+            letter-spacing: 0.06em;
+            color: #d8d8d8;
+        }
+
+        @media (max-width: 480px) {
+            .writings-main { padding-top: 100px; }
+            .essay { margin-bottom: 48px; padding-bottom: 48px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg-canvas"></canvas>
+
+    <nav class="top-nav">
+        <a class="nav-home" href="index.html">AYAAN NAVEED MALIK</a>
+        <a class="nav-substack" href="https://substack.com/@ayaanm" target="_blank" rel="noopener noreferrer">Substack ↗</a>
+    </nav>
+
+    <main class="writings-main">
+        <header class="writings-header">
+            <h1 class="writings-title">writing.</h1>
+            <p class="writings-desc">essays at the intersection of philosophy, mathematics, and the texture of thought.</p>
+        </header>
+
+        <article class="essay">
+            <div class="essay-meta">Nov 24, 2025</div>
+            <h2 class="essay-title">
+                <a href="https://substack.com/home/post/p-179776298" target="_blank" rel="noopener noreferrer">on the juxtaposition of personhood: cradles and cages.</a>
+            </h2>
+            <p class="essay-sub">juxtaposition is my favorite word in literature</p>
+            <p class="essay-excerpt">we coined <em>juxtaposition</em> for paintings and poems, but it always ended up being a self-portrait: two things placed in parallel, offering their stark contrast a voice. we are that difference. we are the animal that builds cradles and designs cages &mdash; we paint murals on nursery walls and draft blueprints for prisons. we whisper stories to help a child fall asleep and, in the same civilization, write policies that decide who never walks free again. same hands, same nervous system. cradles and cages, assembled under one restless sky.</p>
+            <a class="essay-read" href="https://substack.com/home/post/p-179776298" target="_blank" rel="noopener noreferrer">read on substack →</a>
+        </article>
+
+        <article class="essay">
+            <div class="essay-meta">Sep 11, 2025</div>
+            <h2 class="essay-title">
+                <a href="https://substack.com/home/post/p-173333264" target="_blank" rel="noopener noreferrer">a lesson in refraction</a>
+            </h2>
+            <p class="essay-sub">fragments of nietzsche</p>
+            <p class="essay-excerpt">beauty arrives at the pace of its disappearance. i keep learning this in small ways: this morning, i shattered a wine glass &mdash; and for the first time, the rays of dawn seemed to notice it. the cracks refracted into small rainbows, scattering the very colors the smooth surface had hidden. as if the morning had been searching all along, and only brokenness gave it something to hold. <em>decay is not the enemy of beauty, but merely its tutor. it teaches light where to rest.</em></p>
+            <a class="essay-read" href="https://substack.com/home/post/p-173333264" target="_blank" rel="noopener noreferrer">read on substack →</a>
+        </article>
+
+        <article class="essay">
+            <div class="essay-meta">Aug 24, 2025</div>
+            <h2 class="essay-title">
+                <a href="https://substack.com/home/post/p-171775171" target="_blank" rel="noopener noreferrer">an intimate meditation on doubt</a>
+            </h2>
+            <p class="essay-sub">learning to live with not-knowing</p>
+            <p class="essay-excerpt">to ask the meaning of life is to pose an ill-conditioned problem: infinite unknowns, yet finite observations. each question generates <em>more</em> uncertainty than it resolves. why, then, do we question? perhaps not to arrive at solutions but to remain within the process, like an algorithm that oscillates around truth. the ache of uncertainty becomes a signal that life is still sampling possibilities. doubt is not the failure of reason but the trace of consciousness exploring a world too large to model.</p>
+            <a class="essay-read" href="https://substack.com/home/post/p-171775171" target="_blank" rel="noopener noreferrer">read on substack →</a>
+        </article>
+    </main>
+
+    <footer class="writings-footer">
+        © 2026 Ayaan Naveed Malik
+    </footer>
+
+    <script>
+    // Drifting glyph background — atmospheric static, extremely low opacity.
+    // Regular charset mixed with mathematical symbols echoes the essays'
+    // technical-philosophical register without competing with the text.
+    (function () {
+        var canvas = document.getElementById('bg-canvas');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+
+        var CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' +
+                    '+-*/|:;[]{}<>@#$%&∂∫∑∇∞≈→λσφε∀∃¬∧∨ℝ';
+
+        var W, H, cells;
+        var CW = 40, CH = 34;
+
+        function rg() { return CHARS.charAt((Math.random() * CHARS.length) | 0); }
+
+        function rebuild() {
+            W = canvas.width  = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+            var cols = Math.ceil(W / CW) + 1;
+            var rows = Math.ceil(H / CH) + 2;
+            cells = [];
+            for (var r = 0; r < rows; r++) {
+                for (var c = 0; c < cols; c++) {
+                    cells.push({
+                        x:  c * CW + (Math.random() - 0.5) * 10,
+                        y:  r * CH + (Math.random() - 0.5) * 10,
+                        g:  rg(),
+                        op: Math.random() * 0.028 + 0.008,
+                        sz: Math.random() * 2.5 + 8.5,
+                        vy: Math.random() * 0.10 + 0.03,
+                        cr: Math.random() * 0.0006 + 0.00008,
+                    });
+                }
+            }
+        }
+
+        window.addEventListener('resize', rebuild);
+        rebuild();
+
+        var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+            for (var i = 0; i < cells.length; i++) {
+                var cl = cells[i];
+                ctx.font = cl.sz + 'px "Lucida Grande", monospace';
+                ctx.fillStyle = 'rgba(0,0,0,' + cl.op.toFixed(3) + ')';
+                ctx.fillText(cl.g, cl.x, cl.y);
+            }
+        }
+
+        if (reduced) { draw(); return; }
+
+        function frame() {
+            for (var i = 0; i < cells.length; i++) {
+                var cl = cells[i];
+                cl.y += cl.vy;
+                if (cl.y > H + 20) { cl.y = -20; cl.g = rg(); }
+                if (Math.random() < cl.cr) cl.g = rg();
+            }
+            draw();
+            requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    })();
+    </script>
+
+    <script>
+    // Decrypt the "writing." title on load — mirrors the hero decrypt on the main page.
+    (function () {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+        var CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-*/|:;[]{}<>@#$%&';
+        function rnd() { return CHARS.charAt((Math.random() * CHARS.length) | 0); }
+
+        function wrapAndCollect(node, bucket) {
+            if (node.nodeType === 3) {
+                var t = node.textContent;
+                if (!t) return;
+                var frag = document.createDocumentFragment();
+                for (var i = 0; i < t.length; i++) {
+                    var ch = t.charAt(i);
+                    var span = document.createElement('span');
+                    if (/\s/.test(ch)) {
+                        span.textContent = ch;
+                    } else {
+                        span.setAttribute('data-final', ch);
+                        span.textContent = rnd();
+                        bucket.push(span);
+                    }
+                    frag.appendChild(span);
+                }
+                node.parentNode.replaceChild(frag, node);
+                return;
+            }
+            if (node.nodeType === 1) {
+                var kids = Array.prototype.slice.call(node.childNodes);
+                for (var j = 0; j < kids.length; j++) wrapAndCollect(kids[j], bucket);
+            }
+        }
+
+        function run() {
+            var root = document.querySelector('.writings-title');
+            if (!root) return;
+            var bucket = [];
+            wrapAndCollect(root, bucket);
+            if (!bucket.length) return;
+
+            var start = performance.now();
+            var preRoll = 80, duration = 680, jitter = 110;
+            var denom = Math.max(1, bucket.length - 1);
+            for (var i = 0; i < bucket.length; i++) {
+                var progress = bucket.length === 1 ? 1 : i / denom;
+                bucket[i]._unlockAt = start + preRoll + progress * duration + Math.random() * jitter;
+            }
+
+            function frame(now) {
+                var pending = false;
+                for (var c = 0; c < bucket.length; c++) {
+                    var s = bucket[c];
+                    if (s._done) continue;
+                    if (now >= s._unlockAt) {
+                        s.textContent = s.getAttribute('data-final');
+                        s.removeAttribute('data-final');
+                        s._done = true;
+                        continue;
+                    }
+                    pending = true;
+                    if (Math.random() < 0.4) s.textContent = rnd();
+                }
+                if (pending) requestAnimationFrame(frame);
+            }
+            requestAnimationFrame(frame);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', run);
+        } else {
+            run();
+        }
+    })();
+    </script>
+
+</body>
+</html>

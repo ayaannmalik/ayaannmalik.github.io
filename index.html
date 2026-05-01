@@ -189,7 +189,7 @@
           padding-bottom: 22px;
           border-bottom: 1px solid #e6e6e6;
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           gap: 24px;
         }
 
@@ -384,6 +384,101 @@
           display: inline;
         }
 
+        .writing-cards {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          margin-top: 4px;
+        }
+
+        .writing-card {
+          display: block;
+          padding: 18px 20px 20px;
+          border-radius: 8px;
+          text-decoration: none;
+          color: inherit;
+          position: relative;
+          overflow: hidden;
+          transition: box-shadow 0.22s;
+        }
+
+        .writing-card:hover {
+          box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+        }
+
+        /* SVG border that JS traces on reveal */
+        .card-border-svg {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          overflow: visible;
+        }
+        .card-border-rect {
+          fill: none;
+          stroke: #e4e4e4;
+          stroke-width: 1;
+          transition: stroke 0.2s;
+        }
+        .writing-card:hover .card-border-rect { stroke: #cacaca; }
+
+        /* Scan line that sweeps down on reveal */
+        .card-scan {
+          position: absolute;
+          left: -8%; width: 116%;
+          height: 1px;
+          background: linear-gradient(to right, transparent 0%, rgba(236,72,114,0.28) 50%, transparent 100%);
+          top: 0;
+          pointer-events: none;
+          z-index: 2;
+          opacity: 0;
+        }
+
+        .writing-card-date {
+          font-family: "Open Sans", sans-serif;
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #ccc;
+          margin-bottom: 7px;
+          position: relative;
+        }
+
+        .writing-card-title {
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 1.4;
+          color: #111;
+          margin-bottom: 8px;
+          transition: color 0.2s;
+          position: relative;
+        }
+
+        .writing-card:hover .writing-card-title {
+          color: #ec4872;
+        }
+
+        .writing-card-excerpt {
+          font-size: 12.5px;
+          line-height: 1.7;
+          color: #888;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          position: relative;
+        }
+
+        @media (max-width: 700px) {
+          .writing-cards { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 480px) {
+          .writing-cards { grid-template-columns: 1fr; }
+        }
+
         @media (max-width: 480px) {
           .content {
             padding: 60px 20px 40px;
@@ -465,6 +560,33 @@
                         <p class="meta"><span class="lab">NVIDIA GEAR</span><span class="meta-sep">·</span><span class="venue-name">ICML 2026</span><span class="badge badge-oral">Spotlight</span></p>
                         <p>A foundation world model pretrained on 44k hours of diverse human egocentric videos—the largest dataset to date for world model pretraining—that demonstrates strong generalization to diverse objects and environments, with stable real-time interactions at 10 FPS for over 1 minute after distillation.</p>
                     </div>
+                </div>
+            </section>
+
+            <section class="section" id="writing">
+                <h2>writing</h2>
+                <div class="writing-cards">
+                    <a class="writing-card" href="https://substack.com/home/post/p-179776298" target="_blank" rel="noopener noreferrer">
+                        <svg class="card-border-svg" aria-hidden="true"><rect class="card-border-rect" x="0.5" y="0.5" rx="7.5"/></svg>
+                        <div class="card-scan"></div>
+                        <div class="writing-card-date">Nov 24, 2025</div>
+                        <div class="writing-card-title">on the juxtaposition of personhood: cradles and cages.</div>
+                        <div class="writing-card-excerpt">we are the animal that builds cradles and designs cages. we paint murals on nursery walls and draft blueprints for prisons. same hands, same nervous system.</div>
+                    </a>
+                    <a class="writing-card" href="https://substack.com/home/post/p-173333264" target="_blank" rel="noopener noreferrer">
+                        <svg class="card-border-svg" aria-hidden="true"><rect class="card-border-rect" x="0.5" y="0.5" rx="7.5"/></svg>
+                        <div class="card-scan"></div>
+                        <div class="writing-card-date">Sep 11, 2025</div>
+                        <div class="writing-card-title">a lesson in refraction</div>
+                        <div class="writing-card-excerpt">beauty arrives at the pace of its disappearance. the cracks refracted into small rainbows, scattering the very colors the smooth surface had hidden.</div>
+                    </a>
+                    <a class="writing-card" href="https://substack.com/home/post/p-171775171" target="_blank" rel="noopener noreferrer">
+                        <svg class="card-border-svg" aria-hidden="true"><rect class="card-border-rect" x="0.5" y="0.5" rx="7.5"/></svg>
+                        <div class="card-scan"></div>
+                        <div class="writing-card-date">Aug 24, 2025</div>
+                        <div class="writing-card-title">an intimate meditation on doubt</div>
+                        <div class="writing-card-excerpt">to ask the meaning of life is to pose an ill-conditioned problem: infinite unknowns, yet finite observations. doubt is not the failure of reason but the trace of consciousness exploring a world too large to model.</div>
+                    </a>
                 </div>
             </section>
         </main>
@@ -777,41 +899,41 @@
 
   // ── Node definitions ──────────────────────────────────────────────────────
   var DEFS = [
-    // CS / ML  (15)
-    { label: 'world models',    cat: 'cs',     imp: 3 },
-    { label: 'embodied AI',     cat: 'cs',     imp: 3 },
+    // CS / ML — world models & representation learning, specific/niche  (15)
+    { label: 'JEPA',            cat: 'cs',     imp: 3 },
+    { label: 'RSSM',            cat: 'cs',     imp: 2 },
+    { label: 'Dreamer',         cat: 'cs',     imp: 2 },
+    { label: 'ELBO',            cat: 'cs',     imp: 2 },
+    { label: 'score matching',  cat: 'cs',     imp: 2 },
+    { label: 'slot attention',  cat: 'cs',     imp: 2 },
+    { label: 'object-centric',  cat: 'cs',     imp: 2 },
+    { label: 'VQ-VAE',          cat: 'cs',     imp: 2 },
+    { label: 'predictive coding', cat: 'cs',   imp: 2 },
+    { label: 'latent dynamics', cat: 'cs',     imp: 2 },
     { label: 'diffusion',       cat: 'cs',     imp: 2 },
-    { label: 'latent space',    cat: 'cs',     imp: 2 },
-    { label: 'transformers',    cat: 'cs',     imp: 2 },
-    { label: 'RL',              cat: 'cs',     imp: 1 },
-    { label: 'control',         cat: 'cs',     imp: 2 },
-    { label: 'sim2real',        cat: 'cs',     imp: 1 },
-    { label: 'video models',    cat: 'cs',     imp: 2 },
-    { label: 'representation',  cat: 'cs',     imp: 2 },
-    { label: 'robotics',        cat: 'cs',     imp: 2 },
-    { label: 'VLA',             cat: 'cs',     imp: 1 },
-    { label: 'planning',        cat: 'cs',     imp: 1 },
-    { label: 'generalization',  cat: 'cs',     imp: 2 },
-    { label: '\u2207 descent',  cat: 'cs',     imp: 1 },
-    // Bridge  (7) — appear pink, connect both sides
-    { label: 'intelligence',    cat: 'bridge', imp: 3 },
-    { label: 'perception',      cat: 'bridge', imp: 3 },
-    { label: 'world',           cat: 'bridge', imp: 3 },
-    { label: 'sensation',       cat: 'bridge', imp: 2 },
-    { label: 'action',          cat: 'bridge', imp: 2 },
-    { label: 'AGI',             cat: 'bridge', imp: 2 },
-    { label: 'simulation',      cat: 'bridge', imp: 2 },
-    // Philosophy  (10)
-    { label: 'phantasia',       cat: 'philo',  imp: 3 },
-    { label: 'Sellars',         cat: 'philo',  imp: 3 },
-    { label: 'Helmholtz',       cat: 'philo',  imp: 2 },
-    { label: 'Aristotle',       cat: 'philo',  imp: 2 },
-    { label: 'manifest image',  cat: 'philo',  imp: 2 },
-    { label: 'consciousness',   cat: 'philo',  imp: 2 },
-    { label: 'affordance',      cat: 'philo',  imp: 1 },
-    { label: 'qualia',          cat: 'philo',  imp: 1 },
-    { label: 'inference',       cat: 'philo',  imp: 2 },
-    { label: 'the given',       cat: 'philo',  imp: 2 },
+    { label: 'contrastive',     cat: 'cs',     imp: 1 },
+    { label: 'causal masking',  cat: 'cs',     imp: 1 },
+    { label: 'TWM',             cat: 'cs',     imp: 1 },
+    { label: 'consistency',     cat: 'cs',     imp: 1 },
+    // Bridge  (7) — pink, the hinge between both sides
+    { label: 'representation',  cat: 'bridge', imp: 3 },
+    { label: 'embodiment',      cat: 'bridge', imp: 3 },
+    { label: 'grounding',       cat: 'bridge', imp: 3 },
+    { label: 'world model',     cat: 'bridge', imp: 3 },
+    { label: 'causality',       cat: 'bridge', imp: 2 },
+    { label: 'affordance',      cat: 'bridge', imp: 2 },
+    { label: 'agency',          cat: 'bridge', imp: 2 },
+    // Philosophy — existentialism & phenomenology, specific/niche  (10)
+    { label: 'Dasein',          cat: 'philo',  imp: 3 },
+    { label: 'intentionality',  cat: 'philo',  imp: 3 },
+    { label: 'Merleau-Ponty',   cat: 'philo',  imp: 2 },
+    { label: 'Husserl',         cat: 'philo',  imp: 2 },
+    { label: 'phenomenology',   cat: 'philo',  imp: 2 },
+    { label: 'thrownness',      cat: 'philo',  imp: 2 },
+    { label: 'facticity',       cat: 'philo',  imp: 2 },
+    { label: 'horizon',         cat: 'philo',  imp: 2 },
+    { label: 'temporality',     cat: 'philo',  imp: 2 },
+    { label: 'Heidegger',       cat: 'philo',  imp: 2 },
   ];
 
   var N = DEFS.length;
@@ -1245,6 +1367,166 @@
   } else {
     requestAnimationFrame(frame);
   }
+})();
+    </script>
+    <script>
+// Writing card reveal: SVG border trace + scan line sweep + per-char decrypt.
+// Triggered by IntersectionObserver, staggered 110 ms per card.
+// Text chars start as pink scramble glyphs (matching the page's scroll decrypt)
+// and resolve left-to-right with a colour bleed from #ec4872 → settled.
+(function () {
+  var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-*/|:;[]{}<>@#$%&";
+  function rnd() { return CHARSET.charAt((Math.random() * CHARSET.length) | 0); }
+
+  // Wrap every non-whitespace character in a span; push to bucket.
+  function wrapEl(el, bucket) {
+    if (!el) return;
+    var nodes = Array.prototype.slice.call(el.childNodes);
+    for (var ni = 0; ni < nodes.length; ni++) {
+      var node = nodes[ni];
+      if (node.nodeType !== 3) continue;
+      var txt = node.textContent;
+      if (!txt) continue;
+      var frag = document.createDocumentFragment();
+      for (var ci = 0; ci < txt.length; ci++) {
+        var ch = txt.charAt(ci);
+        var sp = document.createElement('span');
+        if (/\s/.test(ch)) {
+          sp.textContent = ch;
+        } else {
+          sp.setAttribute('data-f', ch);
+          sp.textContent = rnd();
+          sp.style.color = '#ec4872';
+          bucket.push(sp);
+        }
+        frag.appendChild(sp);
+      }
+      node.parentNode.replaceChild(frag, node);
+    }
+  }
+
+  // Assign staggered unlock timestamps within a bucket.
+  function stamp(bucket, baseMs, gapMs) {
+    for (var i = 0; i < bucket.length; i++) {
+      bucket[i]._at = baseMs + i * gapMs + Math.random() * gapMs * 0.5;
+    }
+  }
+
+  // Run the RAF decrypt loop over all spans.
+  function decrypt(spans) {
+    function loop(now) {
+      var live = false;
+      for (var i = 0; i < spans.length; i++) {
+        var s = spans[i];
+        if (s._done) continue;
+        if (!s._at || now < s._at) {
+          live = true;
+          // Active scramble while locked — same 40% rate as page hero.
+          if (Math.random() < 0.40) s.textContent = rnd();
+          continue;
+        }
+        // Unlock: swap to final char, bleed colour pink → settled over 400 ms.
+        s.textContent = s.getAttribute('data-f');
+        s.removeAttribute('data-f');
+        s.style.transition = 'color 0.40s ease';
+        s.style.color = '';
+        s._done = true;
+      }
+      if (live) requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  // Collect cards.
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.writing-card'));
+  if (!cards.length) return;
+
+  // Per-card data: wrap text immediately so chars start scrambled.
+  var data = cards.map(function (card) {
+    var db = [], tb = [], eb = [];
+    if (!REDUCED) {
+      wrapEl(card.querySelector('.writing-card-date'),    db);
+      wrapEl(card.querySelector('.writing-card-title'),   tb);
+      wrapEl(card.querySelector('.writing-card-excerpt'), eb);
+      // Start the scramble loop so chars animate while waiting.
+      decrypt(db.concat(tb).concat(eb));
+      // Hide card until reveal.
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(6px)';
+      card.style.transition = 'opacity 0.42s ease, transform 0.42s ease, box-shadow 0.22s';
+    }
+    return {
+      card: card,
+      db: db, tb: tb, eb: eb,
+      rect: card.querySelector('.card-border-rect'),
+      scan: card.querySelector('.card-scan'),
+    };
+  });
+
+  if (REDUCED) return;
+
+  var revealed = 0;
+
+  function revealCard(d, delayMs) {
+    var card = d.card;
+
+    // ── Fade + lift card in ────────────────────────────────────────────────
+    setTimeout(function () {
+      card.style.opacity = '1';
+      card.style.transform = 'translateY(0)';
+    }, delayMs);
+
+    // ── SVG border trace ──────────────────────────────────────────────────
+    if (d.rect) {
+      var box = card.getBoundingClientRect();
+      var w = box.width - 1, h = box.height - 1;
+      d.rect.setAttribute('width',  w);
+      d.rect.setAttribute('height', h);
+      var perim = 2 * (w + h);
+      d.rect.style.strokeDasharray  = perim;
+      d.rect.style.strokeDashoffset = perim;
+      setTimeout(function () {
+        d.rect.style.transition = 'stroke-dashoffset 0.72s cubic-bezier(0.4,0,0.2,1), stroke 0.2s';
+        d.rect.style.strokeDashoffset = '0';
+      }, delayMs);
+    }
+
+    // ── Scan line sweep ───────────────────────────────────────────────────
+    if (d.scan) {
+      setTimeout(function () {
+        d.scan.style.opacity = '1';
+        d.scan.style.transition = 'top 0.70s ease';
+        d.scan.style.top = '102%';
+        setTimeout(function () {
+          d.scan.style.transition = 'top 0.70s ease, opacity 0.28s ease';
+          d.scan.style.opacity = '0';
+        }, 680);
+      }, delayMs);
+    }
+
+    // ── Decrypt text ──────────────────────────────────────────────────────
+    // Timestamps are offsets from performance.now(); chars already scrambling.
+    var base = performance.now() + delayMs;
+    stamp(d.db, base,         24); // date resolves fastest
+    stamp(d.tb, base +  70,   28); // title next
+    stamp(d.eb, base + 210,   18); // excerpt (most chars, fastest gap)
+  }
+
+  var io = new IntersectionObserver(function (entries) {
+    for (var ei = 0; ei < entries.length; ei++) {
+      var entry = entries[ei];
+      if (!entry.isIntersecting) continue;
+      var card = entry.target;
+      var idx  = cards.indexOf(card);
+      if (idx < 0) continue;
+      revealCard(data[idx], revealed * 110);
+      revealed++;
+      io.unobserve(card);
+    }
+  }, { threshold: 0.12 });
+
+  cards.forEach(function (card) { io.observe(card); });
 })();
     </script>
 </body>
