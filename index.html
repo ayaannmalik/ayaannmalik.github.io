@@ -1028,40 +1028,46 @@
   // ── Node definitions ──────────────────────────────────────────────────────
   var DEFS = [
     // CS / ML — world models & representation learning, specific/niche  (15)
-    { label: 'JEPA',            cat: 'cs',     imp: 3 },
-    { label: 'RSSM',            cat: 'cs',     imp: 2 },
-    { label: 'Dreamer',         cat: 'cs',     imp: 2 },
-    { label: 'ELBO',            cat: 'cs',     imp: 2 },
-    { label: 'score matching',  cat: 'cs',     imp: 2 },
-    { label: 'slot attention',  cat: 'cs',     imp: 2 },
-    { label: 'object-centric',  cat: 'cs',     imp: 2 },
-    { label: 'VQ-VAE',          cat: 'cs',     imp: 2 },
-    { label: 'predictive coding', cat: 'cs',   imp: 2 },
-    { label: 'latent dynamics', cat: 'cs',     imp: 2 },
-    { label: 'diffusion',       cat: 'cs',     imp: 2 },
-    { label: 'contrastive',     cat: 'cs',     imp: 1 },
-    { label: 'causal masking',  cat: 'cs',     imp: 1 },
-    { label: 'TWM',             cat: 'cs',     imp: 1 },
-    { label: 'consistency',     cat: 'cs',     imp: 1 },
+    { label: 'JEPA',            cat: 'cs',      imp: 3 },
+    { label: 'RSSM',            cat: 'cs',      imp: 2 },
+    { label: 'Dreamer',         cat: 'cs',      imp: 2 },
+    { label: 'ELBO',            cat: 'cs',      imp: 2 },
+    { label: 'score matching',  cat: 'cs',      imp: 2 },
+    { label: 'slot attention',  cat: 'cs',      imp: 2 },
+    { label: 'object-centric',  cat: 'cs',      imp: 2 },
+    { label: 'VQ-VAE',          cat: 'cs',      imp: 2 },
+    { label: 'predictive coding', cat: 'cs',    imp: 2 },
+    { label: 'latent dynamics', cat: 'cs',      imp: 2 },
+    { label: 'diffusion',       cat: 'cs',      imp: 2 },
+    { label: 'contrastive',     cat: 'cs',      imp: 1 },
+    { label: 'causal masking',  cat: 'cs',      imp: 1 },
+    { label: 'TWM',             cat: 'cs',      imp: 1 },
+    { label: 'consistency',     cat: 'cs',      imp: 1 },
     // Bridge  (7) — pink, the hinge between both sides
-    { label: 'representation',  cat: 'bridge', imp: 3 },
-    { label: 'embodiment',      cat: 'bridge', imp: 3 },
-    { label: 'grounding',       cat: 'bridge', imp: 3 },
-    { label: 'world model',     cat: 'bridge', imp: 3 },
-    { label: 'causality',       cat: 'bridge', imp: 2 },
-    { label: 'affordance',      cat: 'bridge', imp: 2 },
-    { label: 'agency',          cat: 'bridge', imp: 2 },
+    { label: 'representation',  cat: 'bridge',  imp: 3 },
+    { label: 'embodiment',      cat: 'bridge',  imp: 3 },
+    { label: 'grounding',       cat: 'bridge',  imp: 3 },
+    { label: 'world model',     cat: 'bridge',  imp: 3 },
+    { label: 'causality',       cat: 'bridge',  imp: 2 },
+    { label: 'affordance',      cat: 'bridge',  imp: 2 },
+    { label: 'agency',          cat: 'bridge',  imp: 2 },
     // Philosophy — existentialism & phenomenology, specific/niche  (10)
-    { label: 'Dasein',          cat: 'philo',  imp: 3 },
-    { label: 'intentionality',  cat: 'philo',  imp: 3 },
-    { label: 'Merleau-Ponty',   cat: 'philo',  imp: 2 },
-    { label: 'Husserl',         cat: 'philo',  imp: 2 },
-    { label: 'phenomenology',   cat: 'philo',  imp: 2 },
-    { label: 'thrownness',      cat: 'philo',  imp: 2 },
-    { label: 'facticity',       cat: 'philo',  imp: 2 },
-    { label: 'horizon',         cat: 'philo',  imp: 2 },
-    { label: 'temporality',     cat: 'philo',  imp: 2 },
-    { label: 'Heidegger',       cat: 'philo',  imp: 2 },
+    { label: 'Dasein',          cat: 'philo',   imp: 3 },
+    { label: 'intentionality',  cat: 'philo',   imp: 3 },
+    { label: 'Merleau-Ponty',   cat: 'philo',   imp: 2 },
+    { label: 'Husserl',         cat: 'philo',   imp: 2 },
+    { label: 'phenomenology',   cat: 'philo',   imp: 2 },
+    { label: 'thrownness',      cat: 'philo',   imp: 2 },
+    { label: 'facticity',       cat: 'philo',   imp: 2 },
+    { label: 'horizon',         cat: 'philo',   imp: 2 },
+    { label: 'temporality',     cat: 'philo',   imp: 2 },
+    { label: 'Heidegger',       cat: 'philo',   imp: 2 },
+    // Writing — ideas from the Substack essays  (5)
+    { label: 'aporia',          cat: 'writing', imp: 2 },
+    { label: 'refraction',      cat: 'writing', imp: 2 },
+    { label: 'witness',         cat: 'writing', imp: 2 },
+    { label: 'finitude',        cat: 'writing', imp: 2 },
+    { label: 'the unsaid',      cat: 'writing', imp: 2 },
   ];
 
   var N = DEFS.length;
@@ -1082,11 +1088,12 @@
   var csPool = DEFS.filter(function (d) { return d.cat === 'cs'; });
   var brPool = DEFS.filter(function (d) { return d.cat === 'bridge'; });
   var phPool = DEFS.filter(function (d) { return d.cat === 'philo'; });
-  var ci = 0, bi = 0, pi_ = 0;
+  var wrPool = DEFS.filter(function (d) { return d.cat === 'writing'; });
+  var ci = 0, bi = 0, pi_ = 0, wr_ = 0;
 
   // Unit-sphere positions; we multiply by RX/RY/RZ each frame so resize works.
   var nodes = fibPts.map(function (p, idx) {
-    var def = idx < 15 ? csPool[ci++] : idx < 22 ? brPool[bi++] : phPool[pi_++];
+    var def = idx < 15 ? csPool[ci++] : idx < 22 ? brPool[bi++] : idx < 32 ? phPool[pi_++] : wrPool[wr_++];
     return { ux: p.x, uy: p.y, uz: p.z,
              label: def.label, cat: def.cat, imp: def.imp,
              phase: Math.random() * 6.2832 };
@@ -1137,9 +1144,10 @@
   }
   // Tuned for a pure-white background.
   var COLORS = {
-    cs:     hexToRgb('#1f1f24'),
-    bridge: hexToRgb('#ec4872'),
-    philo:  hexToRgb('#5a6c80')
+    cs:      hexToRgb('#1f1f24'),
+    bridge:  hexToRgb('#ec4872'),
+    philo:   hexToRgb('#5a6c80'),
+    writing: hexToRgb('#8b7355')
   };
 
   // ── 3-D helpers ───────────────────────────────────────────────────────────
