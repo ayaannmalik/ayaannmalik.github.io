@@ -640,6 +640,114 @@
           .writing-cards { grid-template-columns: 1fr; }
         }
 
+        /* ── Chess ──────────────────────────────────────────────────────────── */
+        .chess-meta {
+          font-size: 12.5px;
+          color: #999;
+          margin-bottom: 18px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .chess-elo {
+          font-weight: 600;
+          color: #ec4872;
+          font-size: 12.5px;
+        }
+        .chess-wrap {
+          display: flex;
+          gap: 28px;
+          align-items: flex-start;
+          flex-wrap: wrap;
+        }
+        .chess-board {
+          display: grid;
+          grid-template-columns: repeat(8, 1fr);
+          border: 1px solid #e4e4e4;
+          border-radius: 4px;
+          overflow: hidden;
+          width: clamp(240px, 48vw, 400px);
+          aspect-ratio: 1;
+          flex-shrink: 0;
+          user-select: none;
+        }
+        .chess-sq {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          position: relative;
+          aspect-ratio: 1;
+        }
+        .chess-sq-light { background: #f9f9f9; }
+        .chess-sq-dark  { background: #e0e0e0; }
+        .chess-sq-selected { background: rgba(236,72,114,0.22) !important; }
+        .chess-sq-check    { background: rgba(236,72,114,0.38) !important; }
+        .chess-sq-target::after {
+          content: '';
+          position: absolute;
+          width: 30%;
+          height: 30%;
+          border-radius: 50%;
+          background: rgba(236,72,114,0.35);
+          pointer-events: none;
+        }
+        .chess-sq-target.chess-sq-occupied::after {
+          width: 90%; height: 90%;
+          background: transparent;
+          border-radius: 50%;
+          border: 3px solid rgba(236,72,114,0.45);
+        }
+        .chess-piece {
+          font-size: clamp(18px, 4.2vw, 34px);
+          line-height: 1;
+          position: relative;
+          z-index: 1;
+        }
+        .chess-piece-w { color: #1a1a1a; text-shadow: 0 0 3px rgba(255,255,255,0.9), 0 1px 2px rgba(0,0,0,0.18); }
+        .chess-piece-b { color: #444;    text-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+
+        .chess-sidebar {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          padding-top: 4px;
+          min-width: 140px;
+        }
+        .chess-status {
+          font-size: 13.5px;
+          color: #333;
+          font-style: italic;
+          min-height: 20px;
+        }
+        .chess-btn-group {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .chess-btn {
+          background: none;
+          border: 1px solid #e0e0e0;
+          border-radius: 6px;
+          padding: 7px 14px;
+          font-size: 12px;
+          font-family: inherit;
+          cursor: pointer;
+          color: #555;
+          text-align: left;
+          letter-spacing: 0.04em;
+          transition: border-color 0.18s, color 0.18s;
+        }
+        .chess-btn:hover { border-color: #ec4872; color: #ec4872; }
+        .chess-thinking {
+          font-size: 11px;
+          color: #bbb;
+          letter-spacing: 0.06em;
+          font-style: normal;
+          text-transform: uppercase;
+        }
+
         @media (max-width: 480px) {
           .content {
             padding: 60px 20px 40px;
@@ -782,6 +890,23 @@
                         <div class="writing-card-title">an intimate meditation on doubt</div>
                         <div class="writing-card-excerpt">to ask the meaning of life is to pose an ill-conditioned problem: infinite unknowns, yet finite observations. doubt is not the failure of reason but the trace of consciousness exploring a world too large to model.</div>
                     </a>
+                </div>
+            </section>
+            <section class="section" id="chess">
+                <h2>bored?</h2>
+                <div class="chess-meta">
+                    playing against <span class="chess-elo">~1800 ELO</span> stockfish engine &middot; you play white
+                </div>
+                <div class="chess-wrap">
+                    <div id="chess-board-inner" class="chess-board"></div>
+                    <div class="chess-sidebar">
+                        <div id="chess-status" class="chess-status">your turn.</div>
+                        <div id="chess-thinking" class="chess-thinking" style="display:none">thinking...</div>
+                        <div class="chess-btn-group">
+                            <button id="chess-new" class="chess-btn">new game</button>
+                            <button id="chess-flip" class="chess-btn">flip board</button>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
@@ -1670,6 +1795,164 @@
   }, { threshold: 0.12 });
 
   cards.forEach(function (card) { io.observe(card); });
+})();
+    </script>
+    <script>
+// ── Chess vs ~1800 ELO Stockfish (via stockfish.online API) ──────────────────
+(function () {
+  // Dynamically load chess.js then boot the game.
+  var s = document.createElement('script');
+  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js';
+  s.onload = boot;
+  document.head.appendChild(s);
+
+  var UNICODE = {
+    wK:'♔',wQ:'♕',wR:'♖',wB:'♗',wN:'♘',wP:'♙',
+    bK:'♚',bQ:'♛',bR:'♜',bB:'♝',bN:'♞',bP:'♟'
+  };
+  var FILES = 'abcdefgh';
+
+  function boot() {
+    var game     = new Chess();
+    var selected = null;
+    var flipped  = false;
+    var busy     = false;
+
+    var boardEl   = document.getElementById('chess-board-inner');
+    var statusEl  = document.getElementById('chess-status');
+    var thinkEl   = document.getElementById('chess-thinking');
+
+    function setStatus(txt) { if (statusEl) statusEl.textContent = txt; }
+    function setThink(on)   { if (thinkEl)  thinkEl.style.display = on ? '' : 'none'; }
+
+    function render() {
+      if (!boardEl) return;
+      boardEl.innerHTML = '';
+      var pos    = game.board();  // pos[0] = rank 8, pos[7] = rank 1
+      var ranks  = flipped ? [0,1,2,3,4,5,6,7] : [7,6,5,4,3,2,1,0];
+      var files  = flipped ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+
+      // Legal targets for selected piece
+      var targets = {};
+      if (selected) {
+        var mvs = game.moves({ square: selected, verbose: true });
+        mvs.forEach(function(m) { targets[m.to] = true; });
+      }
+
+      for (var ri = 0; ri < 8; ri++) {
+        for (var fi = 0; fi < 8; fi++) {
+          var rank  = ranks[ri];
+          var file  = files[fi];
+          var sq    = FILES[file] + (rank + 1);
+          var piece = pos[7 - rank][file];
+
+          var cell = document.createElement('div');
+          var light = (rank + file) % 2 !== 0;
+          cell.className = 'chess-sq chess-sq-' + (light ? 'light' : 'dark');
+          cell.dataset.sq = sq;
+
+          if (selected === sq)             cell.classList.add('chess-sq-selected');
+          if (targets[sq])                 cell.classList.add('chess-sq-target');
+          if (targets[sq] && piece)        cell.classList.add('chess-sq-occupied');
+
+          // King in check
+          if (game.in_check() && piece && piece.type === 'k' && piece.color === game.turn())
+            cell.classList.add('chess-sq-check');
+
+          if (piece) {
+            var sp = document.createElement('span');
+            sp.className = 'chess-piece chess-piece-' + piece.color;
+            sp.textContent = UNICODE[piece.color + piece.type.toUpperCase()];
+            cell.appendChild(sp);
+          }
+
+          cell.addEventListener('click', onClick.bind(null, sq));
+          boardEl.appendChild(cell);
+        }
+      }
+    }
+
+    function onClick(sq) {
+      if (busy || game.game_over() || game.turn() !== 'w') return;
+      var pos   = game.board();
+      var file  = FILES.indexOf(sq[0]);
+      var rank  = parseInt(sq[1]) - 1;
+      var piece = pos[7 - rank][file];
+
+      if (selected) {
+        var move = game.move({ from: selected, to: sq, promotion: 'q' });
+        selected = null;
+        if (move) {
+          render();
+          if (game.game_over()) { endStatus(); return; }
+          engineMove();
+        } else {
+          // Reselect if own piece clicked
+          if (piece && piece.color === 'w') selected = sq;
+          render();
+        }
+      } else {
+        if (piece && piece.color === 'w') selected = sq;
+        render();
+      }
+    }
+
+    function engineMove() {
+      busy = true;
+      setStatus('engine thinking...');
+      setThink(true);
+      var fen = encodeURIComponent(game.fen());
+      // depth 12 ≈ 1800 ELO play strength
+      fetch('https://stockfish.online/api/s/v2.php?fen=' + fen + '&depth=12')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          busy = false;
+          setThink(false);
+          if (d.success && d.bestmove) {
+            // bestmove field: "e2e4" or "bestmove e2e4 ponder ..."
+            var raw  = d.bestmove.trim().split(' ');
+            var mv   = raw[0] === 'bestmove' ? raw[1] : raw[0];
+            if (mv && mv.length >= 4) {
+              game.move({ from: mv.slice(0,2), to: mv.slice(2,4), promotion: mv[4] || 'q' });
+            }
+          }
+          render();
+          if (game.game_over()) { endStatus(); return; }
+          setStatus('your turn.');
+        })
+        .catch(function() {
+          busy = false;
+          setThink(false);
+          setStatus('engine unavailable. your turn.');
+          render();
+        });
+    }
+
+    function endStatus() {
+      if (game.in_checkmate())
+        setStatus(game.turn() === 'w' ? 'checkmate. you lost.' : 'checkmate. you won!');
+      else if (game.in_draw())
+        setStatus('draw.');
+      else
+        setStatus('game over.');
+    }
+
+    document.getElementById('chess-new').addEventListener('click', function() {
+      game     = new Chess();
+      selected = null;
+      busy     = false;
+      setThink(false);
+      setStatus('your turn.');
+      render();
+    });
+
+    document.getElementById('chess-flip').addEventListener('click', function() {
+      flipped = !flipped;
+      render();
+    });
+
+    render();
+  }
 })();
     </script>
     <script>
