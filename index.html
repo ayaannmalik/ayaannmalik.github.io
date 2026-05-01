@@ -498,10 +498,12 @@
           font-size: 14px;
           line-height: 1.62;
         }
+
+        .decrypt-char {
           display: inline;
         }
 
-        /* ── Research philosophy card ──────────────────────────────────────── */
+        /* ── Research direction card ─────────────────────────────────────────── */
         .research-card {
           display: flex;
           gap: 40px;
@@ -585,45 +587,16 @@
         .writing-card {
           display: block;
           padding: 18px 20px 20px;
+          border: 1px solid #e8e8e8;
           border-radius: 8px;
           text-decoration: none;
           color: inherit;
-          position: relative;
-          overflow: hidden;
-          transition: box-shadow 0.22s;
+          transition: border-color 0.2s, box-shadow 0.22s;
         }
 
         .writing-card:hover {
+          border-color: #d0d0d0;
           box-shadow: 0 2px 18px rgba(236,72,114,0.12);
-        }
-
-        /* SVG border that JS traces on reveal */
-        .card-border-svg {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          overflow: visible;
-        }
-        .card-border-rect {
-          fill: none;
-          stroke: #e4e4e4;
-          stroke-width: 1;
-          transition: stroke 0.2s;
-        }
-        .writing-card:hover .card-border-rect { stroke: #cacaca; }
-
-        /* Scan line that sweeps down on reveal */
-        .card-scan {
-          position: absolute;
-          left: -8%; width: 116%;
-          height: 1px;
-          background: linear-gradient(to right, transparent 0%, rgba(236,72,114,0.28) 50%, transparent 100%);
-          top: 0;
-          pointer-events: none;
-          z-index: 2;
-          opacity: 0;
         }
 
         .writing-card-date {
@@ -634,7 +607,6 @@
           text-transform: uppercase;
           color: #ccc;
           margin-bottom: 7px;
-          position: relative;
         }
 
         .writing-card-title {
@@ -644,7 +616,6 @@
           color: #111;
           margin-bottom: 8px;
           transition: color 0.2s;
-          position: relative;
         }
 
         .writing-card:hover .writing-card-title {
@@ -659,7 +630,6 @@
           -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
-          position: relative;
         }
 
         @media (max-width: 700px) {
@@ -754,12 +724,11 @@
                     <div class="brain-wrap" aria-hidden="true">
                         <canvas id="brain-graph"></canvas>
                         <div class="brain-hint">drag to rotate</div>
-            
                     </div>
                 </div>
                 <div class="research-card">
                     <div class="research-card-left">
-                        <div class="research-card-label">research philosophy</div>
+                        <div class="research-card-label">research direction</div>
                         <h3 class="research-card-heading">understanding through imagination.</h3>
                         <a class="research-card-link" href="#" target="_blank" rel="noopener noreferrer">read more &rarr;</a>
                     </div>
@@ -799,22 +768,16 @@
                 <h2>writing.</h2>
                 <div class="writing-cards">
                     <a class="writing-card" href="https://substack.com/home/post/p-179776298" target="_blank" rel="noopener noreferrer">
-                        <svg class="card-border-svg" aria-hidden="true"><rect class="card-border-rect" x="0.5" y="0.5" rx="7.5"/></svg>
-                        <div class="card-scan"></div>
                         <div class="writing-card-date">Nov 24, 2025</div>
                         <div class="writing-card-title">on the juxtaposition of personhood: cradles and cages.</div>
                         <div class="writing-card-excerpt">we are the animal that builds cradles and designs cages. we paint murals on nursery walls and draft blueprints for prisons. same hands, same nervous system.</div>
                     </a>
                     <a class="writing-card" href="https://substack.com/home/post/p-173333264" target="_blank" rel="noopener noreferrer">
-                        <svg class="card-border-svg" aria-hidden="true"><rect class="card-border-rect" x="0.5" y="0.5" rx="7.5"/></svg>
-                        <div class="card-scan"></div>
                         <div class="writing-card-date">Sep 11, 2025</div>
                         <div class="writing-card-title">a lesson in refraction</div>
                         <div class="writing-card-excerpt">beauty arrives at the pace of its disappearance. the cracks refracted into small rainbows, scattering the very colors the smooth surface had hidden.</div>
                     </a>
                     <a class="writing-card" href="https://substack.com/home/post/p-171775171" target="_blank" rel="noopener noreferrer">
-                        <svg class="card-border-svg" aria-hidden="true"><rect class="card-border-rect" x="0.5" y="0.5" rx="7.5"/></svg>
-                        <div class="card-scan"></div>
                         <div class="writing-card-date">Aug 24, 2025</div>
                         <div class="writing-card-title">an intimate meditation on doubt</div>
                         <div class="writing-card-excerpt">to ask the meaning of life is to pose an ill-conditioned problem: infinite unknowns, yet finite observations. doubt is not the failure of reason but the trace of consciousness exploring a world too large to model.</div>
@@ -1608,16 +1571,12 @@
 })();
     </script>
     <script>
-// Writing card reveal: SVG border trace + scan line sweep + per-char decrypt.
-// Triggered by IntersectionObserver, staggered 110 ms per card.
-// Text chars start as pink scramble glyphs (matching the page's scroll decrypt)
-// and resolve left-to-right with a colour bleed from #ec4872 → settled.
+// Writing cards: per-char decrypt on scroll into view (no border / scan animations).
 (function () {
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-*/|:;[]{}<>@#$%&";
   function rnd() { return CHARSET.charAt((Math.random() * CHARSET.length) | 0); }
 
-  // Wrap every non-whitespace character in a span; push to bucket.
   function wrapEl(el, bucket) {
     if (!el) return;
     var nodes = Array.prototype.slice.call(el.childNodes);
@@ -1644,14 +1603,12 @@
     }
   }
 
-  // Assign staggered unlock timestamps within a bucket.
   function stamp(bucket, baseMs, gapMs) {
     for (var i = 0; i < bucket.length; i++) {
       bucket[i]._at = baseMs + i * gapMs + Math.random() * gapMs * 0.5;
     }
   }
 
-  // Run the RAF decrypt loop over all spans.
   function decrypt(spans) {
     function loop(now) {
       var live = false;
@@ -1660,11 +1617,9 @@
         if (s._done) continue;
         if (!s._at || now < s._at) {
           live = true;
-          // Active scramble while locked — same 40% rate as page hero.
           if (Math.random() < 0.40) s.textContent = rnd();
           continue;
         }
-        // Unlock: swap to final char, bleed colour pink → settled over 400 ms.
         s.textContent = s.getAttribute('data-f');
         s.removeAttribute('data-f');
         s.style.transition = 'color 0.40s ease';
@@ -1676,79 +1631,29 @@
     requestAnimationFrame(loop);
   }
 
-  // Collect cards.
   var cards = Array.prototype.slice.call(document.querySelectorAll('.writing-card'));
   if (!cards.length) return;
 
-  // Per-card data: wrap text immediately so chars start scrambled.
   var data = cards.map(function (card) {
     var db = [], tb = [], eb = [];
     if (!REDUCED) {
       wrapEl(card.querySelector('.writing-card-date'),    db);
       wrapEl(card.querySelector('.writing-card-title'),   tb);
       wrapEl(card.querySelector('.writing-card-excerpt'), eb);
-      // Start the scramble loop so chars animate while waiting.
       decrypt(db.concat(tb).concat(eb));
-      // Hide card until reveal.
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(6px)';
-      card.style.transition = 'opacity 0.42s ease, transform 0.42s ease, box-shadow 0.22s';
     }
-    return {
-      card: card,
-      db: db, tb: tb, eb: eb,
-      rect: card.querySelector('.card-border-rect'),
-      scan: card.querySelector('.card-scan'),
-    };
+    return { card: card, db: db, tb: tb, eb: eb };
   });
 
   if (REDUCED) return;
 
   var revealed = 0;
 
-  function revealCard(d, delayMs) {
-    var card = d.card;
-
-    // ── Fade + lift card in ────────────────────────────────────────────────
-    setTimeout(function () {
-      card.style.opacity = '1';
-      card.style.transform = 'translateY(0)';
-    }, delayMs);
-
-    // ── SVG border trace ──────────────────────────────────────────────────
-    if (d.rect) {
-      var box = card.getBoundingClientRect();
-      var w = box.width - 1, h = box.height - 1;
-      d.rect.setAttribute('width',  w);
-      d.rect.setAttribute('height', h);
-      var perim = 2 * (w + h);
-      d.rect.style.strokeDasharray  = perim;
-      d.rect.style.strokeDashoffset = perim;
-      setTimeout(function () {
-        d.rect.style.transition = 'stroke-dashoffset 0.72s cubic-bezier(0.4,0,0.2,1), stroke 0.2s';
-        d.rect.style.strokeDashoffset = '0';
-      }, delayMs);
-    }
-
-    // ── Scan line sweep ───────────────────────────────────────────────────
-    if (d.scan) {
-      setTimeout(function () {
-        d.scan.style.opacity = '1';
-        d.scan.style.transition = 'top 0.70s ease';
-        d.scan.style.top = '102%';
-        setTimeout(function () {
-          d.scan.style.transition = 'top 0.70s ease, opacity 0.28s ease';
-          d.scan.style.opacity = '0';
-        }, 680);
-      }, delayMs);
-    }
-
-    // ── Decrypt text ──────────────────────────────────────────────────────
-    // Timestamps are offsets from performance.now(); chars already scrambling.
+  function startDecrypt(d, delayMs) {
     var base = performance.now() + delayMs;
-    stamp(d.db, base,         24); // date resolves fastest
-    stamp(d.tb, base +  70,   28); // title next
-    stamp(d.eb, base + 210,   18); // excerpt (most chars, fastest gap)
+    stamp(d.db, base,       24);
+    stamp(d.tb, base + 70, 28);
+    stamp(d.eb, base + 210, 18);
   }
 
   var io = new IntersectionObserver(function (entries) {
@@ -1758,7 +1663,7 @@
       var card = entry.target;
       var idx  = cards.indexOf(card);
       if (idx < 0) continue;
-      revealCard(data[idx], revealed * 110);
+      startDecrypt(data[idx], revealed * 110);
       revealed++;
       io.unobserve(card);
     }
