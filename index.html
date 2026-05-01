@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ayaan Naveed Malik</title>
+    <link rel="icon" type="image/png" href="assets/profile.png">
+    <link rel="apple-touch-icon" href="assets/profile.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&family=Unica+One&display=swap" rel="stylesheet">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <!-- Preload the hero poster so it renders as LCP instantly -->
+    <link rel="preload" as="image" href="assets/starship_poster.jpg" fetchpriority="high">
+    <!-- Open Sans 400+500 only (600 weight unused); Unica One for the title -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500&family=Unica+One&display=swap" rel="stylesheet">
     <style>
         * {
           margin: 0;
@@ -611,7 +617,8 @@
     </header>
 
     <section class="landing">
-        <video class="landing-video" src="assets/starship_ascii.mp4" poster="assets/starship_poster.jpg" autoplay muted loop playsinline preload="auto" aria-hidden="true"></video>
+        <!-- preload="none": poster shows instantly; video streams in background -->
+        <video class="landing-video" src="assets/starship_ascii.mp4" poster="assets/starship_poster.jpg" autoplay muted loop playsinline preload="none" aria-hidden="true"></video>
         <div class="landing-overlay"></div>
         <div class="landing-inner">
             <h1 class="landing-title"><span class="slash">/</span>AYAAN NAVEED MALIK<span class="slash">/</span></h1>
@@ -640,7 +647,7 @@
         <main>
             <section class="section" id="about">
                 <div class="about-tldr">
-                    <img class="tldr-photo" src="assets/profile.png" alt="Ayaan Naveed Malik" />
+                    <img class="tldr-photo" src="assets/profile.png" alt="Ayaan Naveed Malik" loading="lazy" decoding="async" />
                     <div class="tldr-text">
                         <h2>tl;dr</h2>
                         <p>I am a senior at Stanford University studying Computer Science and Philosophy, and a research intern at <a class="highlight-link" href="https://research.nvidia.com/labs/gear/" target="_blank" rel="noopener noreferrer">NVIDIA GEAR</a> advised by <a class="highlight-link" href="https://jimfan.me/" target="_blank" rel="noopener noreferrer">Jim Fan</a> and <a class="highlight-link" href="https://yukezhu.me/" target="_blank" rel="noopener noreferrer">Yuke Zhu</a>. My research focuses on world modeling &amp; embodied AI. Reach out at ayaan04 [at] stanford [dot] edu.</p>
@@ -662,7 +669,7 @@
                 <h2>work</h2>
 
                 <div class="project with-video">
-                    <video autoplay loop muted playsinline>
+                    <video autoplay loop muted playsinline preload="none">
                         <source src="assets/dreamzero_teaser.mp4" type="video/mp4">
                     </video>
                     <div class="project-text">
@@ -673,7 +680,7 @@
                 </div>
 
                 <div class="project with-video">
-                    <video autoplay loop muted playsinline>
+                    <video autoplay loop muted playsinline preload="none">
                         <source src="assets/dreamdojo_teaser.mp4" type="video/mp4">
                     </video>
                     <div class="project-text">
@@ -1483,11 +1490,21 @@
     requestAnimationFrame(frame);
   }
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    requestAnimationFrame(function (ts) { frame(ts); });
-  } else {
-    requestAnimationFrame(frame);
+  // Only start the RAF loop once the canvas scrolls into view.
+  var _graphStarted = false;
+  function _startGraph() {
+    if (_graphStarted) return;
+    _graphStarted = true;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      requestAnimationFrame(function (ts) { frame(ts); });
+    } else {
+      requestAnimationFrame(frame);
+    }
   }
+  var _graphIO = new IntersectionObserver(function (entries) {
+    if (entries[0].isIntersecting) { _startGraph(); _graphIO.disconnect(); }
+  }, { rootMargin: '200px' });
+  _graphIO.observe(canvas);
 })();
     </script>
     <script>
