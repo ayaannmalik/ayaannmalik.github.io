@@ -476,6 +476,79 @@
           display: inline;
         }
 
+        /* ── Research philosophy card ──────────────────────────────────────── */
+        .research-card {
+          display: flex;
+          gap: 40px;
+          padding: 28px 30px 28px 26px;
+          border: 1px solid #ebebeb;
+          border-left: 2px solid #ec4872;
+          border-radius: 0 8px 8px 0;
+          margin-bottom: 32px;
+          align-items: flex-start;
+        }
+
+        .research-card-left {
+          flex-shrink: 0;
+          width: 200px;
+          position: sticky;
+          top: 68px;
+        }
+
+        .research-card-label {
+          font-family: "Open Sans", sans-serif;
+          font-size: 10px;
+          font-weight: 500;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: #ccc;
+          margin-bottom: 9px;
+        }
+
+        .research-card-heading {
+          font-size: 15px;
+          font-weight: 600;
+          line-height: 1.35;
+          color: #0a0a0a;
+          margin-bottom: 14px;
+        }
+
+        .research-card-link {
+          font-size: 12px;
+          color: #ec4872;
+          text-decoration: none;
+          letter-spacing: 0.03em;
+          transition: opacity 0.18s;
+        }
+
+        .research-card-link:hover { opacity: 0.65; }
+
+        .research-card-body {
+          flex: 1;
+          font-size: 13px;
+          line-height: 1.78;
+          color: #666;
+          text-align: justify;
+        }
+
+        .research-card-body p { margin-bottom: 11px; }
+        .research-card-body p:last-child { margin-bottom: 0; }
+
+        .research-card-body a {
+          color: inherit;
+          text-decoration: underline;
+          text-underline-offset: 2px;
+          text-decoration-color: rgba(0,0,0,0.2);
+        }
+
+        .research-card-body a:hover { color: #ec4872; text-decoration-color: #ec4872; }
+        .research-card-body em { font-style: italic; color: #555; }
+
+        @media (max-width: 700px) {
+          .research-card { flex-direction: column; gap: 20px; }
+          .research-card-left { width: 100%; position: static; }
+        }
+
         .writing-cards {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -657,12 +730,20 @@
                         <div class="brain-hint">drag to rotate</div>
                     </div>
                 </div>
-                <h2>what makes embodied intelligence, intelligent?</h2>
-                <p>The world does not arrive to an intelligent system already parsed into meaningful objects, causes, and possibilities for action. It arrives first as sensation &mdash; partial, noisy, local, and ambiguous. Yet somehow, from that stream, an agent forms something like a world: stable, structured, populated by enduring objects and actionable possibilities. That problem sits at the foundation of both intelligence and embodiment, and it&rsquo;s the one I keep returning to.</p>
-                <p>It is also not a new one. Aristotle&rsquo;s treatment of <a class="highlight-link" href="https://plato.stanford.edu/entries/aristotle-psychology/suppl4.html" target="_blank" rel="noopener noreferrer">phantasia</a> already points toward the idea that cognition is not exhausted by immediate perception: the mind retains and manipulates internally available appearances, guiding action even in the absence of the object itself. Helmholtz sharpens this: perception is not passive recording but unconscious inference &mdash; what we experience as a coherent external world is the mind reconstructing distal structure from impoverished sensory stimulation. Both suggest that intelligence is less a receiver than a constructor.</p>
-                <p>But the philosopher who presses this furthest is Wilfrid Sellars. His critique of the &ldquo;<a class="highlight-link" href="https://psyche.co/ideas/wilfrid-sellars-sensory-experience-and-the-myth-of-the-given" target="_blank" rel="noopener noreferrer">Myth of the Given</a>&rdquo; attacks a temptation that appears everywhere in both philosophy and engineering: that raw sensory input &mdash; however actively processed &mdash; can serve as a self-sufficient foundation for knowledge. Construction alone isn&rsquo;t enough. A sensory stream is not yet an intelligible world. Knowledge requires concepts, relations, inferential organization, explanatory integration. That insight translates directly into machine learning: a model does not become intelligent by ingesting pixels, tokens, or trajectories. The central problem is how observations are transformed into representations that capture latent structure and become predictive enough to support simulation, planning, and control.</p>
-                <p>Sellars&rsquo; distinction between the <em>manifest image</em> &mdash; the world as lived, of objects, persons, and intentions &mdash; and the <em>scientific image</em> &mdash; the world as hidden causes and dynamical laws &mdash; captures what I think about most. Intelligence lives at that interface: between appearance and explanation, between being embedded in the world and modeling it from within.</p>
-                <p>My research is motivated by exactly this. The technical questions I work on &mdash; representation learning, generative modeling, multimodality, world models, physical reasoning &mdash; are all downstream of a more fundamental one: how does a system come not merely to observe the world, but to model it well enough to act within it? To me, that is one of the deepest open problems in physical AGI, and the place where philosophy and engineering most honestly converge.</p>
+                <div class="research-card">
+                    <div class="research-card-left">
+                        <div class="research-card-label">research philosophy</div>
+                        <h3 class="research-card-heading">less a receiver than a constructor.</h3>
+                        <a class="research-card-link" href="#" target="_blank" rel="noopener noreferrer">read more &rarr;</a>
+                    </div>
+                    <div class="research-card-body">
+                        <p>The world does not arrive to an intelligent system already parsed into meaningful objects, causes, and possibilities for action. It arrives first as sensation &mdash; partial, noisy, local, and ambiguous. Yet somehow, from that stream, an agent forms something like a world: stable, structured, populated by enduring objects and actionable possibilities. That problem sits at the foundation of both intelligence and embodiment, and it&rsquo;s the one I keep returning to.</p>
+                        <p>It is also not a new one. Aristotle&rsquo;s treatment of <a href="https://plato.stanford.edu/entries/aristotle-psychology/suppl4.html" target="_blank" rel="noopener noreferrer">phantasia</a> already points toward the idea that cognition is not exhausted by immediate perception: the mind retains and manipulates internally available appearances, guiding action even in the absence of the object itself. Helmholtz sharpens this: perception is not passive recording but unconscious inference &mdash; what we experience as a coherent external world is the mind reconstructing distal structure from impoverished sensory stimulation. Both suggest that intelligence is less a receiver than a constructor.</p>
+                        <p>But the philosopher who presses this furthest is Wilfrid Sellars. His critique of the &ldquo;<a href="https://psyche.co/ideas/wilfrid-sellars-sensory-experience-and-the-myth-of-the-given" target="_blank" rel="noopener noreferrer">Myth of the Given</a>&rdquo; attacks a temptation that appears everywhere in both philosophy and engineering: that raw sensory input &mdash; however actively processed &mdash; can serve as a self-sufficient foundation for knowledge. Construction alone isn&rsquo;t enough. A sensory stream is not yet an intelligible world. Knowledge requires concepts, relations, inferential organization, explanatory integration. That insight translates directly into machine learning: a model does not become intelligent by ingesting pixels, tokens, or trajectories. The central problem is how observations are transformed into representations that capture latent structure and become predictive enough to support simulation, planning, and control.</p>
+                        <p>Sellars&rsquo; distinction between the <em>manifest image</em> &mdash; the world as lived, of objects, persons, and intentions &mdash; and the <em>scientific image</em> &mdash; the world as hidden causes and dynamical laws &mdash; captures what I think about most. Intelligence lives at that interface: between appearance and explanation, between being embedded in the world and modeling it from within.</p>
+                        <p>My research is motivated by exactly this. The technical questions I work on &mdash; representation learning, generative modeling, multimodality, world models, physical reasoning &mdash; are all downstream of a more fundamental one: how does a system come not merely to observe the world, but to model it well enough to act within it? To me, that is one of the deepest open problems in physical AGI, and the place where philosophy and engineering most honestly converge.</p>
+                    </div>
+                </div>
             </section>
 
             <section class="section" id="work">
