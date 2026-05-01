@@ -471,7 +471,33 @@
           display: block;
         }
 
-        .decrypt-char {
+        /* Work section: slightly tighter typography */
+        #work h2 {
+          font-size: 18px;
+          margin-bottom: 14px;
+        }
+
+        #work .project h3 {
+          font-size: 16px;
+        }
+
+        #work .project .role {
+          font-size: 14px;
+        }
+
+        #work .project .meta {
+          font-size: 13px;
+        }
+
+        #work .project .meta .badge {
+          font-size: 10px;
+          line-height: 16px;
+        }
+
+        #work .project p {
+          font-size: 14px;
+          line-height: 1.62;
+        }
           display: inline;
         }
 
@@ -510,6 +536,7 @@
           line-height: 1.35;
           color: #0a0a0a;
           margin-bottom: 14px;
+          text-align: left;
         }
 
         .research-card-link {
@@ -722,11 +749,12 @@
                     <img class="tldr-photo" src="assets/profile.png" alt="Ayaan Naveed Malik" loading="lazy" decoding="async" />
                     <div class="tldr-text">
                         <h2>about me.</h2>
-                        <p>I am a senior at Stanford University studying Computer Science and Philosophy, and a research intern at <a class="highlight-link" href="https://research.nvidia.com/labs/gear/" target="_blank" rel="noopener noreferrer">NVIDIA GEAR</a> advised by <a class="highlight-link" href="https://jimfan.me/" target="_blank" rel="noopener noreferrer">Jim Fan</a> and <a class="highlight-link" href="https://yukezhu.me/" target="_blank" rel="noopener noreferrer">Yuke Zhu</a>. My research focuses on world modeling &amp; embodied AI. Reach out at ayaan04 [at] stanford [dot] edu.</p>
+                        <p>I am a senior at Stanford University studying Computer Science and Philosophy, and a research intern at NVIDIA GEAR advised by Jim Fan and Yuke Zhu. My research focuses on world modeling &amp; embodied AI. Reach out at ayaan04 [at] stanford [dot] edu.</p>
                     </div>
                     <div class="brain-wrap" aria-hidden="true">
                         <canvas id="brain-graph"></canvas>
                         <div class="brain-hint">drag to rotate</div>
+            
                     </div>
                 </div>
                 <div class="research-card">
