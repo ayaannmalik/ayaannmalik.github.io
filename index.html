@@ -798,6 +798,12 @@
           gap: 16px;
           padding-top: 36px;
         }
+        .chess-color-meta {
+          font-size: 11px;
+          color: #aaa;
+          letter-spacing: 0.05em;
+          margin-top: -8px;
+        }
         .chess-turn {
           font-size: 13px;
           color: #333;
@@ -829,6 +835,33 @@
           transition: border-color 0.18s, color 0.18s;
         }
         .chess-btn:hover { border-color: #ec4872; color: #ec4872; }
+
+        @media (max-width: 640px) {
+          .chess-board {
+            width: min(calc(100vw - 40px), 384px);
+          }
+          .chess-layout {
+            gap: 14px;
+          }
+          .chess-sidebar {
+            padding-top: 0;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 20px;
+            width: 100%;
+          }
+          .chess-color-meta { display: none; }
+          .chess-actions {
+            flex-direction: row;
+            gap: 8px;
+            width: 100%;
+          }
+          .chess-btn {
+            flex: 1;
+            text-align: center;
+          }
+        }
 
         @media (max-width: 480px) {
           .content {
@@ -975,7 +1008,7 @@
                 </div>
             </section>
             <section class="section" id="chess">
-                <h2>play against my rating in chess :)</span></h2>
+                <h2>play against my rating in chess :)</h2>
                 <div class="chess-layout">
                     <div class="chess-col">
                         <div class="chess-player-row">
@@ -1000,6 +1033,7 @@
                         </div>
                     </div>
                     <div class="chess-sidebar">
+                        <div class="chess-color-meta" id="chess-color-meta"></div>
                         <div class="chess-turn" id="chess-status">your turn.</div>
                         <div class="chess-thinking" id="chess-thinking" style="display:none">thinking...</div>
                         <div class="chess-actions">
@@ -1918,6 +1952,7 @@
     var dragState    = null;
     var premovedFrom = null;
     var premovedTo   = null;
+    var gameGen      = 0; // incremented on each initGame to discard stale engine responses
 
     var boardEl   = document.getElementById('chess-board-inner');
     var statusEl  = document.getElementById('chess-status');
@@ -1933,6 +1968,7 @@
     function setThink(on) { if (thinkEl)  thinkEl.style.display = on ? '' : 'none'; }
 
     function initGame() {
+      gameGen++;
       engineColor      = playerColor === 'w' ? 'b' : 'w';
       game             = new Chess();
       selected         = null;
@@ -1940,6 +1976,7 @@
       busy             = false;
       capturedByPlayer = [];
       capturedByEngine = [];
+      if (dragState && dragState.ghost) dragState.ghost.remove(); // clean up any in-flight drag ghost
       dragState        = null;
       premovedFrom     = null;
       premovedTo       = null;
@@ -1985,7 +2022,8 @@
       playS(mv && mv.captured ? 'Capture' : 'Move');
       if (game.in_check())   setTimeout(function(){ playS('Check');   }, 60);
       if (game.game_over())  setTimeout(function(){
-        playS(game.in_checkmate() && game.turn() === playerColor ? 'Defeat' : 'Victory');
+        if (game.in_checkmate()) playS(game.turn() === playerColor ? 'Defeat' : 'Victory');
+        // draws / stalemate: no sound
       }, 200);
     }
 
@@ -2011,7 +2049,12 @@
         ghost.style.left = tr.left + 'px';
         ghost.style.top  = tr.top  + 'px';
       }); });
-      setTimeout(function() { ghost.remove(); if (destImg) destImg.style.visibility = ''; }, 135);
+      var animGen = gameGen;
+      setTimeout(function() {
+        ghost.remove();
+        if (animGen !== gameGen) return; // board was rebuilt – don't unhide stale destImg
+        if (destImg) destImg.style.visibility = '';
+      }, 135);
     }
 
     // ── Render ──────────────────────────────────────────────────────────────
@@ -2208,8 +2251,6 @@
 
     // ── Engine ───────────────────────────────────────────────────────────────
 
-    // ── Engine ───────────────────────────────────────────────────────────────
-
     function afterEngineMove(anim) {
       renderCaptures(); updateLabels();
       if (game.game_over()) { render(); if (anim) animatePiece(anim.f, anim.t, anim.c, anim.p); showEnd(); return; }
@@ -2229,6 +2270,7 @@
           engineMove();
           return;
         }
+        // premove failed – fall through to 'your turn'
       }
       premovedFrom = null; premovedTo = null;
       render();
@@ -2238,10 +2280,12 @@
 
     function engineMove() {
       busy = true; setThink(true); updateLabels();
+      var myGen = gameGen;
       (function attempt() {
         fetch('https://stockfish.online/api/s/v2.php?fen=' + encodeURIComponent(game.fen()) + '&depth=12')
           .then(function(r) { return r.json(); })
           .then(function(d) {
+            if (myGen !== gameGen) return; // new game started – discard stale response
             if (!d.success || !d.bestmove) throw new Error();
             var raw = d.bestmove.trim().split(' ');
             var mv  = raw[0] === 'bestmove' ? raw[1] : raw[0];
@@ -2255,7 +2299,10 @@
             var anim = movingPiece ? { f: fromUCI, t: toUCI, c: movingPiece.color, p: movingPiece.type } : null;
             afterEngineMove(anim);
           })
-          .catch(function() { setTimeout(attempt, 1000); });
+          .catch(function() {
+            if (myGen !== gameGen) return; // new game started – stop retrying
+            setTimeout(attempt, 1000);
+          });
       })();
     }
 
