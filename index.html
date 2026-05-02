@@ -1964,41 +1964,29 @@
       if (nameBot) nameBot.classList.toggle('active', t === playerColor);
     }
 
-    // ── Audio ────────────────────────────────────────────────────────────────
+    // ── Audio (Lichess standard sound pack) ─────────────────────────────────
 
-    var _actx = null;
-    function getACtx() {
-      if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
-      return _actx;
+    var SND = (function() {
+      var base = 'https://lichess1.org/assets/sound/standard/';
+      var map  = {};
+      ['Move', 'Capture', 'Check', 'Victory', 'Defeat'].forEach(function(n) {
+        var a = new Audio(); a.preload = 'auto'; a.src = base + n + '.mp3';
+        map[n] = a;
+      });
+      return map;
+    })();
+
+    function playS(key) {
+      var a = SND[key]; if (!a) return;
+      a.currentTime = 0; a.play().catch(function(){});
     }
-    function woodSound(vol, freq, decay) {
-      try {
-        var c = getACtx(), len = Math.floor(c.sampleRate * 0.22);
-        var buf = c.createBuffer(1, len, c.sampleRate);
-        var d = buf.getChannelData(0);
-        for (var i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.exp(-i/(c.sampleRate*decay));
-        var src = c.createBufferSource(); src.buffer = buf;
-        var flt = c.createBiquadFilter(); flt.type = 'bandpass';
-        flt.frequency.value = freq; flt.Q.value = 1.8;
-        var g = c.createGain(); g.gain.value = vol;
-        src.connect(flt); flt.connect(g); g.connect(c.destination); src.start();
-      } catch(e) {}
-    }
-    function toneSound(vol, freq, dur) {
-      try {
-        var c = getACtx(), osc = c.createOscillator(), g = c.createGain();
-        osc.frequency.value = freq; osc.type = 'sine';
-        g.gain.setValueAtTime(vol, c.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
-        osc.connect(g); g.connect(c.destination);
-        osc.start(); osc.stop(c.currentTime + dur);
-      } catch(e) {}
-    }
+
     function playMoveSound(mv) {
-      if (mv && mv.captured) woodSound(0.52, 620, 0.075);
-      else                   woodSound(0.30, 980, 0.050);
-      if (game.in_check())   setTimeout(function(){ toneSound(0.14, 1380, 0.10); }, 65);
-      if (game.game_over())  setTimeout(function(){ toneSound(0.20, 330,  0.55); }, 180);
+      playS(mv && mv.captured ? 'Capture' : 'Move');
+      if (game.in_check())   setTimeout(function(){ playS('Check');   }, 60);
+      if (game.game_over())  setTimeout(function(){
+        playS(game.in_checkmate() && game.turn() === playerColor ? 'Defeat' : 'Victory');
+      }, 200);
     }
 
     // ── Animation ─────────────────────────────────────────────────────────────
