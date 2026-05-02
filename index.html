@@ -1964,6 +1964,68 @@
       if (nameBot) nameBot.classList.toggle('active', t === playerColor);
     }
 
+    // ── Audio ────────────────────────────────────────────────────────────────
+
+    var _actx = null;
+    function getACtx() {
+      if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+      return _actx;
+    }
+    function woodSound(vol, freq, decay) {
+      try {
+        var c = getACtx(), len = Math.floor(c.sampleRate * 0.22);
+        var buf = c.createBuffer(1, len, c.sampleRate);
+        var d = buf.getChannelData(0);
+        for (var i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.exp(-i/(c.sampleRate*decay));
+        var src = c.createBufferSource(); src.buffer = buf;
+        var flt = c.createBiquadFilter(); flt.type = 'bandpass';
+        flt.frequency.value = freq; flt.Q.value = 1.8;
+        var g = c.createGain(); g.gain.value = vol;
+        src.connect(flt); flt.connect(g); g.connect(c.destination); src.start();
+      } catch(e) {}
+    }
+    function toneSound(vol, freq, dur) {
+      try {
+        var c = getACtx(), osc = c.createOscillator(), g = c.createGain();
+        osc.frequency.value = freq; osc.type = 'sine';
+        g.gain.setValueAtTime(vol, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+        osc.connect(g); g.connect(c.destination);
+        osc.start(); osc.stop(c.currentTime + dur);
+      } catch(e) {}
+    }
+    function playMoveSound(mv) {
+      if (mv && mv.captured) woodSound(0.52, 620, 0.075);
+      else                   woodSound(0.30, 980, 0.050);
+      if (game.in_check())   setTimeout(function(){ toneSound(0.14, 1380, 0.10); }, 65);
+      if (game.game_over())  setTimeout(function(){ toneSound(0.20, 330,  0.55); }, 180);
+    }
+
+    // ── Animation ─────────────────────────────────────────────────────────────
+
+    function animatePiece(fromSq, toSq, color, type) {
+      if (!boardEl) return;
+      var fromEl = boardEl.querySelector('[data-sq="' + fromSq + '"]');
+      var toEl   = boardEl.querySelector('[data-sq="' + toSq   + '"]');
+      if (!fromEl || !toEl) return;
+      var fr = fromEl.getBoundingClientRect();
+      var tr = toEl.getBoundingClientRect();
+      var destImg = toEl.querySelector('.chess-piece');
+      if (destImg) destImg.style.visibility = 'hidden';
+      var ghost = document.createElement('img');
+      ghost.src = PIECE_SRC + color + type.toUpperCase() + '.svg';
+      ghost.style.cssText = 'position:fixed;pointer-events:none;z-index:9998;'
+        + 'width:' + fr.width + 'px;height:' + fr.height + 'px;'
+        + 'left:' + fr.left + 'px;top:' + fr.top + 'px;'
+        + 'transition:left .12s cubic-bezier(.25,.1,.25,1),top .12s cubic-bezier(.25,.1,.25,1);';
+      document.body.appendChild(ghost);
+      requestAnimationFrame(function() { requestAnimationFrame(function() {
+        ghost.style.left = tr.left + 'px';
+        ghost.style.top  = tr.top  + 'px';
+      }); });
+      setTimeout(function() { ghost.remove(); if (destImg) destImg.style.visibility = ''; }, 135);
+    }
+
     // ── Render ──────────────────────────────────────────────────────────────
 
     function render() {
@@ -2085,6 +2147,7 @@
       if (mv) {
         if (mv.captured) capturedByPlayer.push(mv.captured);
         renderCaptures(); render(); updateLabels();
+        playMoveSound(mv); // sound only — no animation for drag
         if (game.game_over()) { showEnd(); return; }
         if (game.in_check()) setStatus('check!');
         engineMove();
@@ -2125,11 +2188,15 @@
       var pos   = game.board();
       var piece = pos[7 - (parseInt(sq[1]) - 1)][FILES.indexOf(sq[0])];
       if (selected) {
-        var mv = game.move({ from: selected, to: sq, promotion: 'q' });
+        var fromSq2      = selected;
+        var movingPiece  = game.get(fromSq2);
+        var mv = game.move({ from: fromSq2, to: sq, promotion: 'q' });
         selected = null;
         if (mv) {
           if (mv.captured) capturedByPlayer.push(mv.captured);
           renderCaptures(); render(); updateLabels();
+          playMoveSound(mv);
+          if (movingPiece) animatePiece(fromSq2, sq, movingPiece.color, movingPiece.type);
           if (game.game_over()) { showEnd(); return; }
           if (game.in_check()) setStatus('check!');
           engineMove();
@@ -2155,16 +2222,20 @@
 
     // ── Engine ───────────────────────────────────────────────────────────────
 
-    function afterEngineMove() {
+    function afterEngineMove(anim) {
       renderCaptures(); updateLabels();
-      if (game.game_over()) { render(); showEnd(); return; }
+      if (game.game_over()) { render(); if (anim) animatePiece(anim.f, anim.t, anim.c, anim.p); showEnd(); return; }
       if (premovedFrom && premovedTo) {
         var pf = premovedFrom, pt = premovedTo;
         premovedFrom = null; premovedTo = null;
+        var pmPiece = game.get(pf);
         var pmv = game.move({ from: pf, to: pt, promotion: 'q' });
         if (pmv) {
           if (pmv.captured) capturedByPlayer.push(pmv.captured);
           renderCaptures(); render(); updateLabels();
+          if (anim) animatePiece(anim.f, anim.t, anim.c, anim.p);
+          playMoveSound(pmv);
+          if (pmPiece) setTimeout(function(){ animatePiece(pf, pt, pmPiece.color, pmPiece.type); }, 80);
           if (game.game_over()) { showEnd(); return; }
           if (game.in_check()) setStatus('check!');
           engineMove();
@@ -2173,6 +2244,7 @@
       }
       premovedFrom = null; premovedTo = null;
       render();
+      if (anim) animatePiece(anim.f, anim.t, anim.c, anim.p);
       setStatus(game.in_check() ? 'check! your turn.' : 'your turn.');
     }
 
@@ -2187,9 +2259,13 @@
             var mv  = raw[0] === 'bestmove' ? raw[1] : raw[0];
             if (!mv || mv === '(none)' || mv.length < 4) throw new Error();
             busy = false; setThink(false);
-            var m = game.move({ from: mv.slice(0,2), to: mv.slice(2,4), promotion: mv[4]||'q' });
+            var fromUCI = mv.slice(0,2), toUCI = mv.slice(2,4);
+            var movingPiece = game.get(fromUCI);
+            var m = game.move({ from: fromUCI, to: toUCI, promotion: mv[4]||'q' });
             if (m && m.captured) capturedByEngine.push(m.captured);
-            afterEngineMove();
+            if (m) playMoveSound(m);
+            var anim = movingPiece ? { f: fromUCI, t: toUCI, c: movingPiece.color, p: movingPiece.type } : null;
+            afterEngineMove(anim);
           })
           .catch(function() { setTimeout(attempt, 1000); });
       })();
