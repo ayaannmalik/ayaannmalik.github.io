@@ -1881,7 +1881,7 @@
         }
         s.textContent = s.getAttribute('data-f');
         s.removeAttribute('data-f');
-        s.style.transition = 'color 0.40s ease';
+        s.style.transition = 'color 0.22s ease';
         s.style.color = '';
         s._done = true;
       }
@@ -1910,9 +1910,9 @@
 
   function startDecrypt(d, delayMs) {
     var base = performance.now() + delayMs;
-    stamp(d.db, base,       24);
-    stamp(d.tb, base + 70, 28);
-    stamp(d.eb, base + 210, 18);
+    stamp(d.db, base,        12);
+    stamp(d.tb, base +  40, 14);
+    stamp(d.eb, base + 120,  7);
   }
 
   var io = new IntersectionObserver(function (entries) {
