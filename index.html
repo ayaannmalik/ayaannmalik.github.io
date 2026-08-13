@@ -2339,9 +2339,10 @@
     </script>
     <script>
 // Video playback: autoplay is blocked in some states (low-power mode,
-// backgrounded tab) and falls back to a poster with a play button, so visible
-// videos are re-kicked. Offscreen videos are paused — decoding frames nobody
-// sees costs real CPU.
+// backgrounded tab) and falls back to a poster with a play button, so videos
+// are re-kicked. Offscreen project videos are paused — decoding frames nobody
+// sees costs real CPU — but the hero never pauses: pausing a video mid-autoplay
+// can cost the gesture-free autoplay permission and bring the poster back.
 (function () {
   var videos = Array.prototype.slice.call(document.querySelectorAll('video'));
   if (!videos.length) return;
@@ -2356,7 +2357,7 @@
     for (var i = 0; i < videos.length; i++) {
       var v = videos[i];
       if (v._onScreen && !document.hidden) play(v);
-      else if (!v.paused) v.pause();
+      else if (!v.paused && !v._pinned) v.pause();
     }
   }
 
@@ -2366,9 +2367,12 @@
   }, { rootMargin: '100px' });
 
   for (var i = 0; i < videos.length; i++) {
-    videos[i]._onScreen = false;
-    videos[i].addEventListener('loadeddata', sync);
-    io.observe(videos[i]);
+    var v = videos[i];
+    v._pinned = v.classList.contains('landing-video');
+    v._onScreen = true;
+    v.addEventListener('loadeddata', sync);
+    play(v);
+    if (!v._pinned) io.observe(v);
   }
 
   document.addEventListener('visibilitychange', sync);
