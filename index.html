@@ -308,7 +308,7 @@
 
         .tldr-links a:not(:last-child)::after {
           content: "/";
-          color: #ec4872;
+          color: #111;
         }
 
         .tldr-links a:hover {
@@ -318,6 +318,8 @@
         .about-tldr .tldr-text {
           flex: 1;
           min-width: 0;
+          text-align: left;
+          hyphens: none;
         }
 
         .about-tldr p:last-child {
@@ -1754,24 +1756,33 @@
     // Cursor: pointer over a node, otherwise grab/grabbing.
     if (!dragging) canvas.style.cursor = hoveredIdx >= 0 ? 'pointer' : 'grab';
 
-    requestAnimationFrame(frame);
+    if (_graphRunning) requestAnimationFrame(frame);
   }
 
-  // Only start the RAF loop once the canvas scrolls into view.
-  var _graphStarted = false;
-  function _startGraph() {
-    if (_graphStarted) return;
-    _graphStarted = true;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      requestAnimationFrame(function (ts) { frame(ts); });
-    } else {
-      requestAnimationFrame(frame);
+  // The loop only runs while the canvas is on screen and the tab is visible;
+  // otherwise it is pure wasted GPU and battery.
+  var _graphRunning = false;
+  var _graphOnScreen = false;
+
+  var _graphReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function _syncGraph() {
+    if (_graphReduced) {
+      if (_graphOnScreen && !_graphRunning) requestAnimationFrame(function (ts) { frame(ts); });
+      return;
     }
+    var shouldRun = _graphOnScreen && !document.hidden;
+    if (shouldRun === _graphRunning) return;
+    _graphRunning = shouldRun;
+    if (shouldRun) requestAnimationFrame(frame);
   }
-  var _graphIO = new IntersectionObserver(function (entries) {
-    if (entries[0].isIntersecting) { _startGraph(); _graphIO.disconnect(); }
-  }, { rootMargin: '200px' });
-  _graphIO.observe(canvas);
+
+  new IntersectionObserver(function (entries) {
+    _graphOnScreen = entries[0].isIntersecting;
+    _syncGraph();
+  }, { rootMargin: '200px' }).observe(canvas);
+
+  document.addEventListener('visibilitychange', _syncGraph);
 })();
     </script>
     <script>
@@ -2327,29 +2338,43 @@
 })();
     </script>
     <script>
-// Keep every video playing: browsers block autoplay in some states (low-power
-// mode, backgrounded tab), which surfaces a poster and a play button.
+// Video playback: autoplay is blocked in some states (low-power mode,
+// backgrounded tab) and falls back to a poster with a play button, so visible
+// videos are re-kicked. Offscreen videos are paused — decoding frames nobody
+// sees costs real CPU.
 (function () {
-  var videos = document.querySelectorAll('video');
+  var videos = Array.prototype.slice.call(document.querySelectorAll('video'));
+  if (!videos.length) return;
 
-  function kick() {
+  function play(v) {
+    v.muted = true;
+    v.defaultMuted = true;
+    if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  }
+
+  function sync() {
     for (var i = 0; i < videos.length; i++) {
       var v = videos[i];
-      v.muted = true;
-      v.defaultMuted = true;
-      if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      if (v._onScreen && !document.hidden) play(v);
+      else if (!v.paused) v.pause();
     }
   }
 
-  kick();
-  document.addEventListener('visibilitychange', function () { if (!document.hidden) kick(); });
-  ['touchstart', 'pointerdown', 'keydown', 'scroll'].forEach(function (evt) {
-    document.addEventListener(evt, kick, { once: true, passive: true });
-  });
+  var io = new IntersectionObserver(function (entries) {
+    for (var i = 0; i < entries.length; i++) entries[i].target._onScreen = entries[i].isIntersecting;
+    sync();
+  }, { rootMargin: '100px' });
+
   for (var i = 0; i < videos.length; i++) {
-    videos[i].addEventListener('loadeddata', kick);
-    videos[i].addEventListener('pause', function () { setTimeout(kick, 0); });
+    videos[i]._onScreen = false;
+    videos[i].addEventListener('loadeddata', sync);
+    io.observe(videos[i]);
   }
+
+  document.addEventListener('visibilitychange', sync);
+  ['touchstart', 'pointerdown', 'keydown'].forEach(function (evt) {
+    document.addEventListener(evt, sync, { once: true, passive: true });
+  });
 })();
     </script>
 </body>
