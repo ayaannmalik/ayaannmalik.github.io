@@ -294,6 +294,26 @@
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
         }
 
+        .tldr-links {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 18px;
+          margin-top: 12px;
+        }
+
+        .tldr-links a {
+          color: #ec4872;
+          text-decoration: none;
+          font-size: 15px;
+          border-bottom: 1px solid rgba(236, 72, 114, 0.35);
+          transition: border-color 0.18s, color 0.18s;
+        }
+
+        .tldr-links a:hover {
+          color: #d32d5b;
+          border-bottom-color: #d32d5b;
+        }
+
         .about-tldr .tldr-text {
           flex: 1;
           min-width: 0;
@@ -910,7 +930,7 @@
 
     <section class="landing">
         <!-- preload="none": poster shows instantly; video streams in background -->
-        <video class="landing-video" src="assets/starship_ascii.mp4" poster="assets/starship_poster.jpg" autoplay muted loop playsinline preload="none" aria-hidden="true"></video>
+        <video class="landing-video" src="assets/starship_ascii.mp4" poster="assets/starship_poster.jpg" autoplay muted loop playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="auto" aria-hidden="true"></video>
         <div class="landing-overlay"></div>
         <div class="landing-inner">
             <h1 class="landing-title"><span class="slash">/</span>AYAAN NAVEED MALIK<span class="slash">/</span></h1>
@@ -943,6 +963,12 @@
                     <div class="tldr-text">
                         <h2>about me.</h2>
                         <p>I am a senior at Stanford studying Computer Science and Philosophy. Previously, I was a research intern at NVIDIA GEAR, advised by Jim Fan and Yuke Zhu, where we scaled world models for embodied AI and invented WAMs. Before that, I was a research intern at Together AI working on omni-model training and optimization. Feel free to reach out at <span style="color:#ec4872;">ayaan04 [at] stanford [dot] edu</span>.</p>
+                        <nav class="tldr-links" aria-label="Profiles">
+                            <a href="https://x.com/ayaannmalik" target="_blank" rel="noopener noreferrer">twitter</a>
+                            <a href="https://www.linkedin.com/in/ayaannaveedmalik" target="_blank" rel="noopener noreferrer">linkedin</a>
+                            <a href="https://scholar.google.com/citations?hl=en&amp;user=eQCqs3MAAAAJ" target="_blank" rel="noopener noreferrer">scholar</a>
+                            <a href="https://substack.com/@ayaanm" target="_blank" rel="noopener noreferrer">substack</a>
+                        </nav>
                     </div>
                     <div class="brain-wrap" aria-hidden="true">
                         <canvas id="brain-graph"></canvas>
@@ -965,7 +991,7 @@
                 <h2>work.</h2>
 
                 <div class="project with-video">
-                    <video autoplay loop muted playsinline preload="none">
+                    <video autoplay loop muted playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="metadata">
                         <source src="assets/dreamzero_teaser.mp4" type="video/mp4">
                     </video>
                     <div class="project-text">
@@ -976,7 +1002,7 @@
                 </div>
 
                 <div class="project with-video">
-                    <video autoplay loop muted playsinline preload="none">
+                    <video autoplay loop muted playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="metadata">
                         <source src="assets/dreamdojo_teaser.mp4" type="video/mp4">
                     </video>
                     <div class="project-text">
@@ -990,6 +1016,11 @@
             <section class="section" id="writing">
                 <h2>writing.</h2>
                 <div class="writing-cards">
+                    <a class="writing-card" href="https://ayaannaveedmalik.substack.com/p/the-prisoners-advantage" target="_blank" rel="noopener noreferrer">
+                        <div class="writing-card-date">Jul 29, 2026</div>
+                        <div class="writing-card-title">the prisoner’s advantage</div>
+                        <div class="writing-card-excerpt">on anxiety, obsession, and the vigilance that outlives the wall.</div>
+                    </a>
                     <a class="writing-card" href="https://substack.com/home/post/p-179776298" target="_blank" rel="noopener noreferrer">
                         <div class="writing-card-date">Nov 24, 2025</div>
                         <div class="writing-card-title">on the juxtaposition of personhood: cradles and cages.</div>
@@ -2379,6 +2410,32 @@
   }, { threshold: 0 });
 
   io.observe(landing);
+})();
+    </script>
+    <script>
+// Keep every video playing: browsers block autoplay in some states (low-power
+// mode, backgrounded tab), which surfaces a poster and a play button.
+(function () {
+  var videos = document.querySelectorAll('video');
+
+  function kick() {
+    for (var i = 0; i < videos.length; i++) {
+      var v = videos[i];
+      v.muted = true;
+      v.defaultMuted = true;
+      if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+    }
+  }
+
+  kick();
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) kick(); });
+  ['touchstart', 'pointerdown', 'keydown', 'scroll'].forEach(function (evt) {
+    document.addEventListener(evt, kick, { once: true, passive: true });
+  });
+  for (var i = 0; i < videos.length; i++) {
+    videos[i].addEventListener('loadeddata', kick);
+    videos[i].addEventListener('pause', function () { setTimeout(kick, 0); });
+  }
 })();
     </script>
 </body>
