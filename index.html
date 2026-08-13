@@ -280,13 +280,22 @@
           margin-bottom: 24px;
           padding-bottom: 0;
           display: flex;
+          align-items: flex-start;
+          gap: 40px;
+        }
+
+        .about-media {
+          flex-shrink: 0;
+          display: flex;
+          flex-direction: column;
           align-items: center;
-          gap: 24px;
+          gap: 8px;
+          width: 320px;
         }
 
         .about-tldr .tldr-photo {
           flex-shrink: 0;
-          width: 140px;
+          width: 170px;
           height: auto;
           border-radius: 10px;
           display: block;
@@ -327,13 +336,13 @@
         }
 
         @media (max-width: 560px) {
-          .about-tldr {
+          .about-media {
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
           }
 
           .about-tldr .tldr-photo {
-            width: 120px;
+            width: 140px;
           }
         }
 
@@ -372,13 +381,23 @@
         .brain-wrap.touched .brain-hint { opacity: 0; }
 
         @media (max-width: 920px) {
-          .about-tldr { flex-wrap: wrap; }
-          .brain-wrap {
-            order: 3;
+          .about-tldr {
+            flex-direction: column;
+            gap: 24px;
+          }
+
+          .about-media {
             width: 100%;
-            max-width: 420px;
-            height: 260px;
-            margin: 4px auto 0;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+          }
+
+          .brain-wrap {
+            width: 100%;
+            max-width: 320px;
+            height: 240px;
           }
         }
 
@@ -888,17 +907,20 @@
         <main>
             <section class="section" id="about">
                 <div class="about-tldr">
-                    <img class="tldr-photo" src="assets/profile.png" alt="Ayaan Naveed Malik" loading="lazy" decoding="async" />
                     <div class="tldr-text">
                         <h2>about me.</h2>
-                        <p>I am a Research Scientist at AMI Labs, working closely with Yann LeCun &amp; Saining Xie on world models, physical intelligence, and robotics. I studied CS &amp; Philosophy at Stanford. Previously, I was at NVIDIA GEAR Lab, where I worked on DreamZero and DreamDojo &mdash; early efforts in WAMs and scaling egocentric human data, now industry standard in robotics.</p>
+                        <p>I am a Research Scientist at AMI Labs, working closely with Yann LeCun &amp; Saining Xie on world models, physical intelligence, and robotics. I studied CS &amp; Philosophy at Stanford.</p>
+                        <p>Previously, I was at NVIDIA GEAR Lab, where I worked on DreamZero and DreamDojo &mdash; early efforts in WAMs and scaling egocentric human data, now industry standard in robotics.</p>
                         <p>I grew up in Lahore, Pakistan, where I worked deeply &amp; passionately on education reform and helped develop Pakistan&rsquo;s Single National Curriculum, which standardizes education across public, private, and religious schools to eliminate social divides.</p>
                         <p>Reach me at <span style="color:#ec4872;">ayaannaveed04 [at] gmail [dot] com</span>.</p>
                         <nav class="tldr-links" aria-label="Profiles"><a href="https://x.com/ayaannmalik" target="_blank" rel="noopener noreferrer">twitter</a><a href="https://www.linkedin.com/in/ayaannaveedmalik" target="_blank" rel="noopener noreferrer">linkedin</a><a href="https://scholar.google.com/citations?hl=en&amp;user=eQCqs3MAAAAJ" target="_blank" rel="noopener noreferrer">scholar</a><a href="https://substack.com/@ayaanm" target="_blank" rel="noopener noreferrer">substack</a></nav>
                     </div>
-                    <div class="brain-wrap" aria-hidden="true">
-                        <canvas id="brain-graph"></canvas>
-                        <div class="brain-hint">drag to rotate</div>
+                    <div class="about-media">
+                        <img class="tldr-photo" src="assets/profile.png" alt="Ayaan Naveed Malik" loading="lazy" decoding="async" />
+                        <div class="brain-wrap" aria-hidden="true">
+                            <canvas id="brain-graph"></canvas>
+                            <div class="brain-hint">drag to rotate</div>
+                        </div>
                     </div>
                 </div>
             </section>
