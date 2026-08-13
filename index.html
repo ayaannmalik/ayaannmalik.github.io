@@ -295,23 +295,24 @@
         }
 
         .tldr-links {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 18px;
           margin-top: 12px;
+          font-size: 15px;
+          color: #ec4872;
         }
 
         .tldr-links a {
           color: #ec4872;
           text-decoration: none;
-          font-size: 15px;
-          border-bottom: 1px solid rgba(236, 72, 114, 0.35);
-          transition: border-color 0.18s, color 0.18s;
+          transition: color 0.18s;
+        }
+
+        .tldr-links a:not(:last-child)::after {
+          content: "/";
+          color: #ec4872;
         }
 
         .tldr-links a:hover {
           color: #d32d5b;
-          border-bottom-color: #d32d5b;
         }
 
         .about-tldr .tldr-text {
@@ -962,13 +963,10 @@
                     <img class="tldr-photo" src="assets/profile.png" alt="Ayaan Naveed Malik" loading="lazy" decoding="async" />
                     <div class="tldr-text">
                         <h2>about me.</h2>
-                        <p>I am a senior at Stanford studying Computer Science and Philosophy. Previously, I was a research intern at NVIDIA GEAR, advised by Jim Fan and Yuke Zhu, where we scaled world models for embodied AI and invented WAMs. Before that, I was a research intern at Together AI working on omni-model training and optimization. Feel free to reach out at <span style="color:#ec4872;">ayaan04 [at] stanford [dot] edu</span>.</p>
-                        <nav class="tldr-links" aria-label="Profiles">
-                            <a href="https://x.com/ayaannmalik" target="_blank" rel="noopener noreferrer">twitter</a>
-                            <a href="https://www.linkedin.com/in/ayaannaveedmalik" target="_blank" rel="noopener noreferrer">linkedin</a>
-                            <a href="https://scholar.google.com/citations?hl=en&amp;user=eQCqs3MAAAAJ" target="_blank" rel="noopener noreferrer">scholar</a>
-                            <a href="https://substack.com/@ayaanm" target="_blank" rel="noopener noreferrer">substack</a>
-                        </nav>
+                        <p>I am a Research Scientist at AMI Labs, working closely with Yann LeCun &amp; Saining Xie on world models, physical intelligence, and robotics. I studied CS &amp; Philosophy at Stanford. Previously, I was at NVIDIA GEAR Lab, where I worked on DreamZero and DreamDojo &mdash; early efforts in WAMs and scaling egocentric human data, now industry standard in robotics.</p>
+                        <p>I grew up in Lahore, Pakistan, where I worked deeply &amp; passionately on education reform and helped develop Pakistan&rsquo;s Single National Curriculum, which standardizes education across public, private, and religious schools to eliminate social divides.</p>
+                        <p>Reach me at <span style="color:#ec4872;">ayaannaveed04 [at] gmail [dot] com</span>.</p>
+                        <nav class="tldr-links" aria-label="Profiles"><a href="https://x.com/ayaannmalik" target="_blank" rel="noopener noreferrer">twitter</a><a href="https://www.linkedin.com/in/ayaannaveedmalik" target="_blank" rel="noopener noreferrer">linkedin</a><a href="https://scholar.google.com/citations?hl=en&amp;user=eQCqs3MAAAAJ" target="_blank" rel="noopener noreferrer">scholar</a><a href="https://substack.com/@ayaanm" target="_blank" rel="noopener noreferrer">substack</a></nav>
                     </div>
                     <div class="brain-wrap" aria-hidden="true">
                         <canvas id="brain-graph"></canvas>
