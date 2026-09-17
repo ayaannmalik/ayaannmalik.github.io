@@ -152,8 +152,11 @@
         .about-tldr .tldr-text {
           flex: 1;
           min-width: 0;
-          text-align: left;
-          hyphens: none;
+          max-width: 68ch;
+          text-align: justify;
+          text-align-last: left;
+          hyphens: auto;
+          text-wrap: pretty;
         }
 
         .about-tldr p:last-child {
@@ -161,6 +164,11 @@
         }
 
         @media (max-width: 560px) {
+          .about-tldr .tldr-text {
+            text-align: left;
+            hyphens: none;
+          }
+
           .about-media {
             flex-direction: column;
             gap: 12px;
