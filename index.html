@@ -735,7 +735,7 @@
                 <div class="chess-layout">
                     <div class="chess-col">
                         <div class="chess-player-row">
-                            <span class="chess-player-name" id="chess-name-top">engine</span>
+                            <span class="chess-player-name" id="chess-name-top">engine <span class="chess-elo" title="Approximate strength; not an official Chess.com rating.">~1800</span></span>
                             <div class="chess-caps" id="chess-caps-top"></div>
                             <span class="chess-adv" id="chess-adv-top"></span>
                         </div>
@@ -1140,8 +1140,9 @@
   cards.forEach(function (card) { io.observe(card); });
 })();
     </script>
+    <script src="assets/chess-engine.js"></script>
     <script>
-// ── Chess vs ~1800 ELO Stockfish ─────────────────────────────────────────────
+// ── Chess vs strength-limited Stockfish (approximate 1800 target) ─────────────────────────────────────────────
 (function () {
   var s = document.createElement('script');
   s.src = 'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js';
@@ -1162,6 +1163,7 @@
     var premovedFrom = null;
     var premovedTo   = null;
     var gameGen      = 0; // incremented on each initGame to discard stale engine responses
+    var chessEngine  = new SiteChessEngine();
 
     var boardEl   = document.getElementById('chess-board-inner');
     var statusEl  = document.getElementById('chess-status');
@@ -1178,6 +1180,7 @@
 
     function initGame() {
       gameGen++;
+      chessEngine.reset();
       engineColor      = playerColor === 'w' ? 'b' : 'w';
       game             = new Chess();
       selected         = null;
@@ -1488,31 +1491,30 @@
     }
 
     function engineMove() {
-      busy = true; setThink(true); updateLabels();
+      busy = true; setThink(true); setStatus('engine thinking...'); updateLabels();
       var myGen = gameGen;
-      (function attempt() {
-        fetch('https://stockfish.online/api/s/v2.php?fen=' + encodeURIComponent(game.fen()) + '&depth=12')
-          .then(function(r) { return r.json(); })
-          .then(function(d) {
-            if (myGen !== gameGen) return; // new game started – discard stale response
-            if (!d.success || !d.bestmove) throw new Error();
-            var raw = d.bestmove.trim().split(' ');
-            var mv  = raw[0] === 'bestmove' ? raw[1] : raw[0];
-            if (!mv || mv === '(none)' || mv.length < 4) throw new Error();
-            busy = false; setThink(false);
-            var fromUCI = mv.slice(0,2), toUCI = mv.slice(2,4);
-            var movingPiece = game.get(fromUCI);
-            var m = game.move({ from: fromUCI, to: toUCI, promotion: mv[4]||'q' });
-            if (m && m.captured) capturedByEngine.push(m.captured);
-            if (m) playMoveSound(m);
-            var anim = movingPiece ? { f: fromUCI, t: toUCI, c: movingPiece.color, p: movingPiece.type } : null;
-            afterEngineMove(anim);
-          })
-          .catch(function() {
-            if (myGen !== gameGen) return; // new game started – stop retrying
-            setTimeout(attempt, 1000);
-          });
-      })();
+      var history = game.history({ verbose: true }).map(function(move) {
+        return move.from + move.to + (move.promotion || '');
+      });
+      chessEngine.move(history)
+        .then(function(mv) {
+          if (myGen !== gameGen) return;
+          var fromUCI = mv.slice(0,2), toUCI = mv.slice(2,4);
+          var movingPiece = game.get(fromUCI);
+          var m = game.move({ from: fromUCI, to: toUCI, promotion: mv[4] || 'q' });
+          if (!m) throw new Error('The engine returned an illegal move.');
+          busy = false; setThink(false);
+          if (m.captured) capturedByEngine.push(m.captured);
+          playMoveSound(m);
+          var anim = movingPiece ? { f: fromUCI, t: toUCI, c: movingPiece.color, p: movingPiece.type } : null;
+          afterEngineMove(anim);
+        })
+        .catch(function(error) {
+          if (myGen !== gameGen || error.name === 'AbortError') return;
+          chessEngine.reset();
+          busy = false; setThink(false);
+          setStatus('engine unavailable. try new game.');
+        });
     }
 
     // ── Captures & material ──────────────────────────────────────────────────
