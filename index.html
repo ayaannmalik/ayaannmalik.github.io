@@ -293,6 +293,11 @@
           color: #fff;
         }
 
+        .project .meta .presentation {
+          color: #ec4872;
+          font-style: normal;
+        }
+
         .project p {
           color: #555;
         }
@@ -301,6 +306,13 @@
           width: 200px;
           border-radius: 6px;
           display: block;
+        }
+
+        video::-webkit-media-controls,
+        video::-webkit-media-controls-enclosure,
+        video::-webkit-media-controls-start-playback-button {
+          display: none !important;
+          -webkit-appearance: none;
         }
 
         /* Work section: slightly tighter typography */
@@ -674,7 +686,7 @@
                     <div class="tldr-text">
                         <h2>about me.</h2>
                         <p>I am a Research Scientist at <a class="highlight-link" href="https://amilabs.xyz/" target="_blank" rel="noopener noreferrer">AMI Labs</a>, working closely with Yann LeCun &amp; Saining Xie on world models, physical intelligence, and robotics. I did my undergrad in CS &amp; Philosophy at Stanford.</p>
-                        <p>Previously, I was at <a class="highlight-link" href="https://research.nvidia.com/labs/gear/" target="_blank" rel="noopener noreferrer">NVIDIA GEAR Lab</a>, where I worked on DreamZero and DreamDojo. We planted the seed of ego-centric human video scaling in world models &amp; created WAMs. Before that, I worked on sparse visual representations at <a class="highlight-link" href="https://www.together.ai" target="_blank" rel="noopener noreferrer">Together AI</a>. I&rsquo;ve been lucky to be the youngest on every team I&rsquo;ve been a part of, and I think that is the reason I grew so much in the last few years.</p>
+                        <p>Previously, I was at <a class="highlight-link" href="https://research.nvidia.com/labs/gear/" target="_blank" rel="noopener noreferrer">NVIDIA GEAR Lab</a>, where I worked on GR00T2, DreamZero, and DreamDojo. We planted the seed of ego-centric human video scaling in world models &amp; created WAMs. Before that, I worked on sparse visual representations at <a class="highlight-link" href="https://www.together.ai" target="_blank" rel="noopener noreferrer">Together AI</a>. I&rsquo;ve been lucky to be the youngest on every team I&rsquo;ve been a part of, and I think that is the reason I grew so much in the last few years.</p>
                         <p>I grew up in Lahore, Pakistan, where I worked on education reform and helped develop Pakistan&rsquo;s <a class="highlight-link" href="https://ahsedu.org/blog/what-is-the-single-national-curriculum-snc/" target="_blank" rel="noopener noreferrer">Single National Curriculum</a>, which standardizes education across all schools to eliminate social and educational disparities.</p>
                         <p>Reach me at <span style="color:#ec4872;">ayaannaveed04 <span style="color:#555;">[at]</span> gmail <span style="color:#555;">[dot]</span> com</span>.</p>
                     </div>
@@ -688,12 +700,23 @@
                 <h2>work.</h2>
 
                 <div class="project with-video">
+                    <video autoplay loop muted playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="metadata" poster="assets/groot2_poster.jpg" aria-label="GR00T 2: a dexterous robot hand turns a GR00T 1 block into GR00T 2">
+                        <source src="assets/groot2_teaser.mp4" type="video/mp4">
+                    </video>
+                    <div class="project-text">
+                        <h3><a href="https://research.nvidia.com/labs/gear/gr00t-2/">GR00T 2: Scaling Robot Foundation Models for Generalization, Dexterity, and Adaptation</a></h3>
+                        <p class="meta"><span class="lab">NVIDIA GEAR</span><span class="meta-sep">·</span><span class="venue-name">CoRL 2026</span><span class="presentation">(Keynote Presentation)</span></p>
+                        <p>A family of world-action models that jointly predicts future video and robot actions across grippers, dexterous hands, and humanoids. Learns from human video, transfers skills across embodiments, and adapts to new tasks from just a few demonstrations.</p>
+                    </div>
+                </div>
+
+                <div class="project with-video">
                     <video autoplay loop muted playsinline webkit-playsinline disablepictureinpicture disableremoteplayback preload="metadata">
                         <source src="assets/dreamzero_teaser.mp4" type="video/mp4">
                     </video>
                     <div class="project-text">
                         <h3><a href="https://dreamzero0.github.io/">DreamZero: World Action Models are Zero-shot Policies</a></h3>
-                        <p class="meta"><span class="lab">NVIDIA GEAR</span><span class="meta-sep">·</span><span class="venue-name">CoRL 2026</span><span class="badge badge-oral">Oral</span><span class="meta-sep">·</span><span class="venue-name">ICLR 2026 Workshop on World Models</span><span class="badge badge-oral">Oral</span></p>
+                        <p class="meta"><span class="lab">NVIDIA GEAR</span><span class="meta-sep">·</span><span class="venue-name">CoRL 2026</span><span class="badge badge-oral">Oral Presentation</span><span class="meta-sep">·</span><span class="venue-name">ICLR 2026 Workshop on World Models</span><span class="badge badge-oral">Oral Presentation</span></p>
                         <p>A World Action Model built on a pretrained video diffusion backbone that jointly predicts future world states and actions, achieving over 2x improvement in generalization to new tasks and environments compared to state-of-the-art VLAs in real-robot experiments, with real-time closed-loop control at 7Hz.</p>
                     </div>
                 </div>
@@ -704,7 +727,7 @@
                     </video>
                     <div class="project-text">
                         <h3><a href="https://dreamdojo-world.github.io/">DreamDojo: A Generalist Robot World Model from Large-Scale Human Videos</a></h3>
-                        <p class="meta"><span class="lab">NVIDIA GEAR</span><span class="meta-sep">·</span><span class="venue-name">ICML 2026</span><span class="badge badge-oral">Spotlight</span></p>
+                        <p class="meta"><span class="lab">NVIDIA GEAR</span><span class="meta-sep">·</span><span class="venue-name">ICML 2026</span><span class="badge badge-oral">Spotlight Presentation</span></p>
                         <p>A foundation world model pretrained on 44k hours of diverse human egocentric videos—the largest dataset to date for world model pretraining—that demonstrates strong generalization to diverse objects and environments, with stable real-time interactions at 10 FPS for over 1 minute after distillation.</p>
                     </div>
                 </div>
@@ -1574,44 +1597,40 @@
 })();
     </script>
     <script>
-// Video playback: autoplay is blocked in some states (low-power mode,
-// backgrounded tab) and falls back to a poster with a play button, so videos
-// are re-kicked. Offscreen project videos are paused — decoding frames nobody
-// sees costs real CPU — but the hero never pauses: pausing a video mid-autoplay
-// can cost the gesture-free autoplay permission and bring the poster back.
+// Keep every project preview muted, looping and inline, without player controls.
+// Retry after loading, returning to the page, or a gesture if autoplay was blocked.
 (function () {
   var videos = Array.prototype.slice.call(document.querySelectorAll('video'));
   if (!videos.length) return;
 
   function play(v) {
-    v.muted = true;
-    v.defaultMuted = true;
-    if (v.paused) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
-  }
-
-  function sync() {
-    for (var i = 0; i < videos.length; i++) {
-      var v = videos[i];
-      if (v._onScreen && !document.hidden) play(v);
-      else if (!v.paused && !v._pinned) v.pause();
+    if (v.paused && !document.hidden) {
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
     }
   }
 
-  var io = new IntersectionObserver(function (entries) {
-    for (var i = 0; i < entries.length; i++) entries[i].target._onScreen = entries[i].isIntersecting;
-    sync();
-  }, { rootMargin: '100px' });
-
-  for (var i = 0; i < videos.length; i++) {
-    var v = videos[i];
-    v._pinned = v.classList.contains('landing-video');
-    v._onScreen = true;
-    v.addEventListener('loadeddata', sync);
-    play(v);
-    if (!v._pinned) io.observe(v);
+  function sync() {
+    videos.forEach(play);
   }
 
+  videos.forEach(function (v) {
+    v.autoplay = true;
+    v.loop = true;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.playsInline = true;
+    v.controls = false;
+    v.removeAttribute('controls');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+    v.addEventListener('loadeddata', function () { play(v); });
+    v.addEventListener('canplay', function () { play(v); });
+    play(v);
+  });
+
   document.addEventListener('visibilitychange', sync);
+  window.addEventListener('pageshow', sync);
   ['touchstart', 'pointerdown', 'keydown'].forEach(function (evt) {
     document.addEventListener(evt, sync, { once: true, passive: true });
   });
